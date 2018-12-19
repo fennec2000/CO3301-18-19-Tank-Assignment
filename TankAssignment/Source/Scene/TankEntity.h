@@ -186,14 +186,15 @@ private:
 	TUInt32  m_Team;  // Team number for tank (to know who the enemy is)
 	TFloat32 m_Speed; // Current speed (in facing direction)
 	TInt32   m_HP;    // Current hit points for the tank
+	TFloat32 m_TurretSpeed;		// turn rate of the turret per frame
+	TFloat32 m_Countdown;			// delay for tank between actions
 
 	// Tank state
 	EState   m_State; // Current state
 	TFloat32 m_Timer; // A timer used in the example update function   
 
 	// waypointing
-	int m_Waypoint;				// current target waypoint
-	float m_Countdown;			// delay for tank between actions
+	TInt32 m_Waypoint;				// current target waypoint
 	CVector3 m_TargetPosition;	// tanks non waypoint target
 };
 

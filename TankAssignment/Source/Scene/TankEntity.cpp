@@ -37,11 +37,14 @@ namespace gen
 {
 
 // temp waypoints
-	const int waypointMax = 2;
-	CVector3 waypoints[2][waypointMax] = {	{CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f)},
+	const TUInt32 waypointMax = 2;
+	const CVector3 waypoints[2][waypointMax] = {	{CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f)},
 									{CVector3(30.0f, 0.5f, 20.0f),		CVector3(30.0f, 0.5f, -20.0f)} };
-	float Epsilon = 0.1f;
-	float waypointRadious = 1.0f;
+	const TFloat32 Epsilon = 0.1f;
+	const TFloat32 waypointRadious = 2.5f;
+	const TFloat32 turretAngularVision = ToRadians(15);
+	const TFloat32 turretAimSpeedMultiplyer = 1.5f;
+	const TFloat32 turretMinRotation = 0.001f;
 
 	// random
 	std::default_random_engine generator;
@@ -93,6 +96,7 @@ CTankEntity::CTankEntity
 	m_Waypoint = 0;
 	m_Countdown = 0;
 	m_TargetPosition = {0, 0, 0};
+	m_TurretSpeed = 0;
 }
 
 
@@ -112,20 +116,23 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			m_State = EState::Patrol;
 			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
 			m_Speed = m_TankTemplate->GetMaxSpeed();
+			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 			break;
 		case EMessageType::Msg_TankStop:
 			m_State = EState::Inactive;
 			m_Speed = 0;
+			m_TurretSpeed = 0;
 			break;
 		case EMessageType::Msg_TankAim: // temp used to change state
 			m_State = EState::Aim;
 			m_Speed = 0;
 			m_Countdown = 1.0f;
+			m_TurretSpeed = 0;
 			break;
 		case EMessageType::Mgs_TankHit:
 			m_HP -= 20;
 			if (m_HP <= 0)
-				EntityManager.DestroyEntity(GetUID());
+				return false;
 			break;
 		}
 	}
@@ -146,16 +153,53 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
 		}
 
-		// rotate gun
-		Matrix(2).RotateLocalY(m_TankTemplate->GetTurretTurnSpeed());
+		// target in range
+		auto enemyUID = GetTankUID(!m_Team);
+		auto enemy = EntityManager.GetEntity(enemyUID);
+		auto targetVector = enemy->Position() - Position();
+		auto turret = Matrix(2) * Matrix();
+		auto rotationToTarget = Dot(Normalise(targetVector), Normalise( turret.ZAxis()));
 
+		if (abs(rotationToTarget) < turretAngularVision)
+		{
+			m_State = EState::Aim;
+			m_TurretSpeed = 0;
+			m_Speed = 0;
+			m_Countdown = 1.0f;
+		}
 	}
 	else if (m_State == EState::Aim)
 	{
+		// aim
+		auto enemyUID = GetTankUID(!m_Team);
+		auto enemy = EntityManager.GetEntity(enemyUID);
+		auto targetVector = enemy->Position() - Position();
+		auto turret = Matrix(2) * Matrix();
+		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+		bool toRight = (Dot(targetVector, turret.XAxis()) > 0) ? true : false;
+		TFloat32 acosRot = acos(rotationToTarget);
+		if (acosRot > turretMinRotation)
+		{
+			if (toRight)
+				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed() * turretAimSpeedMultiplyer);
+			else
+				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer);
+		}
+
 		if (m_Countdown <= 0)
 		{
+			// fire
+			CVector3 Rotation = {
+				Dot(turret.ZAxis(), CVector3(1, 0, 0)),
+				Dot(turret.ZAxis(), CVector3(0, 1, 0)),
+				Dot(turret.ZAxis(), CVector3(0, 0, 1))
+			};
+			
+			EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position(), Rotation);
+
+			// change state
 			m_State = EState::Evade;
-			m_TargetPosition = {distribution(generator), 0.5f, distribution(generator)};
+			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
 			Matrix().FaceTarget(m_TargetPosition);
 			m_Speed = m_TankTemplate->GetMaxSpeed();
 		}
@@ -166,6 +210,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		{
 			m_State = EState::Patrol;
 			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
+			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 		}
 	}
 	else	// EState::Inactive and catches unknown states
@@ -176,6 +221,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	// Perform movement...
 	// Move along local Z axis scaled by update time
 	Matrix().MoveLocalZ( m_Speed * updateTime );
+	Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
 
 	// countdown
 	if (m_Countdown > 0)

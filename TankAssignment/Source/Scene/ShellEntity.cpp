@@ -45,6 +45,8 @@ CShellEntity::CShellEntity
 ) : CEntity( entityTemplate, UID, name, position, rotation, scale )
 {
 	// Initialise any shell data you add
+	m_Speed = 10.0f;
+	m_Life = 3.0f;
 }
 
 
@@ -53,7 +55,14 @@ CShellEntity::CShellEntity
 // Return false if the entity is to be destroyed
 bool CShellEntity::Update( TFloat32 updateTime )
 {
-	return true; // Placeholder
+	// movement
+	Matrix().MoveLocalZ(m_Speed * updateTime);
+
+	// life
+	m_Life -= updateTime;
+	if (m_Life <= 0)
+		return false;
+	return true;
 }
 
 

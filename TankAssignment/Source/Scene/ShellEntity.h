@@ -72,6 +72,8 @@ private:
 	// Data
 
 	// Add your shell data here
+	TFloat32 m_Speed;	// speed of the bullet
+	TFloat32 m_Life;	// the time the bullet is alive for
 };
 
 
