@@ -43,8 +43,9 @@ namespace gen
 	const TFloat32 Epsilon = 0.1f;
 	const TFloat32 waypointRadious = 2.5f;
 	const TFloat32 turretAngularVision = ToRadians(15);
-	const TFloat32 turretAimSpeedMultiplyer = 1.5f;
+	const TFloat32 turretAimSpeedMultiplyer = 3.0f;
 	const TFloat32 turretMinRotation = 0.001f;
+	const TFloat32 barrelLenght = 4.0f;
 
 	// random
 	std::default_random_engine generator;
@@ -181,21 +182,16 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		if (acosRot > turretMinRotation)
 		{
 			if (toRight)
-				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed() * turretAimSpeedMultiplyer);
+				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
 			else
-				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer);
+				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
 		}
 
 		if (m_Countdown <= 0)
 		{
 			// fire
-			CVector3 Rotation = {
-				Dot(turret.ZAxis(), CVector3(1, 0, 0)),
-				Dot(turret.ZAxis(), CVector3(0, 1, 0)),
-				Dot(turret.ZAxis(), CVector3(0, 0, 1))
-			};
-			
-			EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position(), Rotation);
+			auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0,0,0));
+			EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
 
 			// change state
 			m_State = EState::Evade;
@@ -206,6 +202,19 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	}
 	else if (m_State == EState::Evade)
 	{
+		// reset the turret
+		auto turret = Matrix(2) * Matrix();
+		auto rotationToNeutral = Dot(Normalise(Matrix().ZAxis()), Normalise(turret.ZAxis()));
+		bool toRight = (Dot(Matrix().ZAxis(), turret.XAxis()) > 0) ? true : false;
+		TFloat32 acosRot = acos(rotationToNeutral);
+		if (acosRot > turretMinRotation)
+		{
+			if (toRight)
+				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
+			else
+				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
+		}
+
 		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 		{
 			m_State = EState::Patrol;
