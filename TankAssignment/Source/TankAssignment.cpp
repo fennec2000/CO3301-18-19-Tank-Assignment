@@ -80,6 +80,12 @@ float SumUpdateTimes = 0.0f;
 int NumUpdateTimes = 0;
 float AverageUpdateTime = -1.0f; // Invalid value at first
 
+// Extras
+bool ExtendedInfo = true;
+
+// Current mouse position
+CVector2 MousePixel;
+
 
 //-----------------------------------------------------------------------------
 // Scene management
@@ -254,22 +260,33 @@ void RenderText( const string& text, int X, int Y, float r, float g, float b, bo
 void RenderSceneText( float updateTime )
 {
 	stringstream outText;
-	CEntity* currentCEntity = nullptr;
-	SMessage msg;
-	while (Messenger.FetchMessage(TextSystemUID, &msg))
+	float mouseDistance = INFINITY;
+	TEntityUID NearestTank;
+	// display tanks info
+	for (int i = 0; i < 2; ++i)
 	{
-		switch (msg.type)
+		auto tankUID = GetTankUID(i);
+		auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
+		outText << tank->Template()->GetName() << '\n';
+		if (ExtendedInfo)
 		{
-		case EMessageType::Msg_DisplayEntityInfo:
-			currentCEntity = EntityManager.GetEntity(msg.from);
-			outText << currentCEntity->Template()->GetName();
-			int X, Y;
-			if(MainCamera->PixelFromWorldPt(currentCEntity->Position(), ViewportWidth, ViewportHeight, &X, &Y))
-				RenderText(outText.str(), X, Y, 1.0f, 1.0f, 0.0f, true);
+			outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
+			outText << "State: " << tank->GetState() << '\n';
+		}
+		CVector2 entityScreenPos;
+		if (MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
+		{
+			float entMouseDistance = Distance(MousePixel, entityScreenPos);
+			if (mouseDistance > entMouseDistance)
+			{
+				mouseDistance = entMouseDistance;
+				NearestTank = tankUID;
+			}
+			if (NearestTank == tankUID)
+				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 0.0f, 0.0f, true);
+			else
+				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 1.0f, 0.0f, true);
 			outText.str("");
-			break;
-		default:
-			break;
 		}
 	}
 
@@ -300,11 +317,45 @@ void UpdateScene( float updateTime )
 	// Call all entity update functions
 	EntityManager.UpdateAllEntities( updateTime );
 
+	// picker
+	if (KeyHit(EKeyCode::Mouse_LButton))
+	{
+		// Get nearest tank to mouse
+		float mouseDistance = INFINITY;
+		TEntityUID NearestTank;
+
+		for (int i = 0; i < 2; ++i)
+		{
+			auto tankUID = GetTankUID(i);
+			CEntity* entity = EntityManager.GetEntityAtIndex(tankUID);
+			CVector2 entityScreenPos;
+			if (MainCamera->PixelFromWorldPt(&entityScreenPos, entity->Position(), ViewportWidth, ViewportHeight))
+			{
+				float entMouseDistance = Distance(MousePixel, entityScreenPos);
+				if (mouseDistance > entMouseDistance)
+				{
+					mouseDistance = entMouseDistance;
+					NearestTank = tankUID;
+				}
+			}
+		}
+
+		// Set state
+		SMessage msg;
+		msg.type = EMessageType::Msg_TankEvade;
+		msg.from = SystemUID;
+		Messenger.SendMessage(NearestTank, msg);
+	}
+
 	// Set camera speeds
 	// Key F1 used for full screen toggle
 	if (KeyHit(Key_F2)) CameraMoveSpeed = 5.0f;
 	if (KeyHit(Key_F3)) CameraMoveSpeed = 40.0f;
 	
+	// extra info
+	if (KeyHit(Key_0))
+		ExtendedInfo = !ExtendedInfo;
+
 	// System messages
 	// Go
 	if (KeyHit(Key_1))

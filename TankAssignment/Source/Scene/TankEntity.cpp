@@ -135,6 +135,12 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			if (m_HP <= 0)
 				return false;
 			break;
+		case EMessageType::Msg_TankEvade:
+			m_State = EState::Evade;
+			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+			Matrix().FaceTarget(m_TargetPosition);
+			m_Speed = m_TankTemplate->GetMaxSpeed();
+			break;
 		}
 	}
 

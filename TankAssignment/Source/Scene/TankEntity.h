@@ -149,6 +149,37 @@ public:
 		return m_Speed;
 	}
 
+	const TFloat32& GetHp()
+	{
+		return m_HP;
+	}
+	
+	const TFloat32& GetMaxHp()
+	{
+		return m_TankTemplate->GetMaxHP();
+	}
+
+	const string GetState()
+	{
+		switch (m_State)
+		{
+		case EState::Inactive:
+			return "Inactive";
+			break;
+		case EState::Patrol:
+			return "Patrol";
+			break;
+		case EState::Aim:
+			return "Aim";
+			break;
+		case EState::Evade:
+			return "Evade";
+			break;
+		default:
+			return "";
+			break;
+		}
+	}
 
 	/////////////////////////////////////
 	// Update

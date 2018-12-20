@@ -8,6 +8,7 @@
 #include <d3dx9.h>
 #include "MathDX.h"
 #include "Camera.h"
+#include "CVector4.h"
 
 namespace gen
 {
@@ -109,20 +110,22 @@ void CCamera::Control( EKeyCode turnUp, EKeyCode turnDown,
 // Calculate the X and Y pixel coordinates for the corresponding to given world coordinate
 // using this camera. Pass the viewport width and height. Return false if the world coordinate
 // is behind the camera
-bool CCamera::PixelFromWorldPt( CVector3 worldPt, TUInt32 ViewportWidth, TUInt32 ViewportHeight,
-                                TInt32* X, TInt32* Y )
+bool CCamera::PixelFromWorldPt(CVector2* PixelPt, CVector3 worldPt, TUInt32 ViewportWidth, TUInt32 ViewportHeight)
 {
-	CVector3 viewportPt = m_MatViewProj.TransformPoint(worldPt);
-	if (viewportPt.z < 0)
-	{
+	//++++MISSING Complete this function by refering to lecture notes (read function comment carefully)
+	// Start with world space vertex P
+	CVector4 P(worldPt.x, worldPt.y, worldPt.z, 1);
+
+	// Multiply this vertex by combined view / projection matrix to give projected 2D point Q
+	CVector4 Q = P * m_MatViewProj;
+	if (Q.w < 0)
 		return false;
-	}
 
-	viewportPt.x /= viewportPt.z;
-	viewportPt.y /= viewportPt.z;
-	*X = static_cast<TInt32>((viewportPt.x + 1.0f) * ViewportWidth * 0.5f);
-	*Y = static_cast<TInt32>((1.0f - viewportPt.y) * ViewportHeight * 0.5f);
+	Q.x /= Q.w;
+	Q.y /= Q.w;
 
+	PixelPt->x = (Q.x + 1) * (ViewportWidth * 0.5f);
+	PixelPt->y = (1 - Q.y) * (ViewportHeight * 0.5f);
 	return true;
 }
 

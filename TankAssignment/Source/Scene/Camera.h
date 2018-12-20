@@ -110,8 +110,7 @@ public:
 	// Calculate the X and Y pixel coordinates for the corresponding to given world coordinate
 	// using this camera. Pass the viewport width and height. Return false if the world coordinate
 	// is behind the camera
-	bool PixelFromWorldPt( CVector3 worldPt, TUInt32 ViewportWidth, TUInt32 ViewportHeight,
-	                       TInt32* X, TInt32* Y );
+	bool PixelFromWorldPt(CVector2* PixelPt, CVector3 worldPt, TUInt32 ViewportWidth, TUInt32 ViewportHeight);
 
 	// Calculate the world coordinates of a point on the near clip plane corresponding to given 
 	// X and Y pixel coordinates using this camera. Pass the viewport width and height
