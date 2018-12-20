@@ -11,6 +11,7 @@
 
 namespace gen
 {
+const TFloat32 bulletCollisionRadious = 3.0f;
 
 // Reference to entity manager from TankAssignment.cpp, allows look up of entities by name, UID etc.
 // Can then access other entity's data. See the CEntityManager.h file for functions. Example:
@@ -45,7 +46,7 @@ CShellEntity::CShellEntity
 ) : CEntity( entityTemplate, UID, name, position, rotation, scale )
 {
 	// Initialise any shell data you add
-	m_Speed = 10.0f;
+	m_Speed = 50.0f;
 	m_Life = 3.0f;
 }
 
@@ -57,6 +58,20 @@ bool CShellEntity::Update( TFloat32 updateTime )
 {
 	// movement
 	Matrix().MoveLocalZ(m_Speed * updateTime);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		auto tankUID = GetTankUID(i);
+		auto tank = EntityManager.GetEntity(tankUID);
+		if (tank != nullptr && Distance(Position(), tank->Position()) < bulletCollisionRadious)
+		{
+			SMessage msg;
+			msg.type = EMessageType::Msg_TankHit;
+			msg.from = SystemUID;
+			Messenger.SendMessage(tankUID, msg);
+			return false;
+		}
+	}
 
 	// life
 	m_Life -= updateTime;

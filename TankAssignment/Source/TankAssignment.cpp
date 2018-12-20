@@ -340,7 +340,7 @@ void UpdateScene( float updateTime )
 	if (KeyHit(Key_4))
 	{
 		SMessage msg;
-		msg.type = EMessageType::Mgs_TankHit;
+		msg.type = EMessageType::Msg_TankHit;
 		msg.from = SystemUID;
 		Messenger.SendMessage(TankA, msg);
 		Messenger.SendMessage(TankB, msg);

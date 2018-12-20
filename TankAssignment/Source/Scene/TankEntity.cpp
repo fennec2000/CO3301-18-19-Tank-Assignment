@@ -130,7 +130,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			m_Countdown = 1.0f;
 			m_TurretSpeed = 0;
 			break;
-		case EMessageType::Mgs_TankHit:
+		case EMessageType::Msg_TankHit:
 			m_HP -= 20;
 			if (m_HP <= 0)
 				return false;
@@ -157,16 +157,19 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		// target in range
 		auto enemyUID = GetTankUID(!m_Team);
 		auto enemy = EntityManager.GetEntity(enemyUID);
-		auto targetVector = enemy->Position() - Position();
-		auto turret = Matrix(2) * Matrix();
-		auto rotationToTarget = Dot(Normalise(targetVector), Normalise( turret.ZAxis()));
-
-		if (abs(rotationToTarget) < turretAngularVision)
+		if (enemy != nullptr)
 		{
-			m_State = EState::Aim;
-			m_TurretSpeed = 0;
-			m_Speed = 0;
-			m_Countdown = 1.0f;
+			auto targetVector = enemy->Position() - Position();
+			auto turret = Matrix(2) * Matrix();
+			auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+
+			if (abs(rotationToTarget) < turretAngularVision)
+			{
+				m_State = EState::Aim;
+				m_TurretSpeed = 0;
+				m_Speed = 0;
+				m_Countdown = 1.0f;
+			}
 		}
 	}
 	else if (m_State == EState::Aim)

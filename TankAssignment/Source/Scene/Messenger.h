@@ -23,7 +23,7 @@ enum class EMessageType
 {
 	Msg_TankStart,			// Send the start message for tanks
 	Msg_TankStop,			// Send the stop message for tanks
-	Mgs_TankHit,			// Send hit to a tank
+	Msg_TankHit,			// Send hit to a tank
 	Msg_TankAim,			// Send ain to tank - for testing only
 
 	Msg_DisplayEntityInfo	// display message to screen
