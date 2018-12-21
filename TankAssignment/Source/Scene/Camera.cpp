@@ -134,7 +134,27 @@ bool CCamera::PixelFromWorldPt(CVector2* PixelPt, CVector3 worldPt, TUInt32 View
 CVector3 CCamera::WorldPtFromPixel( TInt32 X, TInt32 Y, 
                                     TUInt32 ViewportWidth, TUInt32 ViewportHeight )
 {
-	return CVector3::kOrigin; // Placeholder code, fill in for User Interface assignment task
+	CVector4 Q(X / (ViewportWidth * 0.5f) - 1,
+		1 - Y / (ViewportHeight * 0.5f),
+		0,
+		m_NearClip);
+
+	// Undo the perspective divide
+	Q.x *= Q.w; Q.y *= Q.w; Q.z *= Q.w;
+	auto InverseMatViewProj(m_MatViewProj);
+	InverseMatViewProj.Invert();
+
+	// Point on the clip plane
+	auto point = Q * InverseMatViewProj;
+
+	// ray
+	const CVector3 ray(m_Matrix.Position());
+	const CVector3 direction(point.Vector3() - m_Matrix.Position());
+
+	// Assuming the ground is 0 in the y axis
+	const auto t = -ray.y / direction.y;
+
+	return ray + direction * t; // Placeholder code, fill in for User Interface assignment task
 }
 
 

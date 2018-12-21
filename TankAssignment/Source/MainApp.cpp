@@ -5,12 +5,14 @@
 ********************************************/
 
 #include <windows.h>
+#include <windowsx.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 
 #include "Defines.h"
 #include "Input.h"
 #include "CTimer.h"
+#include "CVector2.h"
 #include "TankAssignment.h"
 
 namespace gen
@@ -53,8 +55,7 @@ TUInt32 ViewportWidth;
 TUInt32 ViewportHeight;
 
 // Current mouse position
-TUInt32 MouseX;
-TUInt32 MouseY;
+CVector2 MousePixel;
 
 // Game timer
 CTimer Timer;
@@ -199,8 +200,8 @@ LRESULT WINAPI MsgProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		}
 		case WM_MOUSEMOVE:
 		{
-			gen::MouseX = MAKEPOINTS(lParam).x; 
-			gen::MouseY = MAKEPOINTS(lParam).y;
+			gen::MousePixel.x = static_cast<gen::TFloat32>(GET_X_LPARAM(lParam));
+			gen::MousePixel.y = static_cast<gen::TFloat32>(GET_Y_LPARAM(lParam));
 			break;
 		}
 		case WM_LBUTTONDOWN:

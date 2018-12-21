@@ -26,6 +26,7 @@ enum class EMessageType
 	Msg_TankHit,			// Send hit to a tank
 	Msg_TankAim,			// Send ain to tank - for testing only
 	Msg_TankEvade,			// send Evade to tank force it into evade state
+	Msg_TankGoto,			// Tell the tank to move to spot
 
 	Msg_DisplayEntityInfo	// display message to screen
 };

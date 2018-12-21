@@ -63,7 +63,7 @@ extern CMessenger Messenger;
 // Will be needed to implement the required tank behaviour in the Update function below
 extern TEntityUID GetTankUID( int team );
 
-
+extern CVector3 MouseTarget3DPos;
 
 /*-----------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -138,6 +138,12 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		case EMessageType::Msg_TankEvade:
 			m_State = EState::Evade;
 			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+			Matrix().FaceTarget(m_TargetPosition);
+			m_Speed = m_TankTemplate->GetMaxSpeed();
+			break;
+		case EMessageType::Msg_TankGoto:
+			m_State = EState::Evade;
+			m_TargetPosition = MouseTarget3DPos + CVector3(0, 0.5f, 0);
 			Matrix().FaceTarget(m_TargetPosition);
 			m_Speed = m_TankTemplate->GetMaxSpeed();
 			break;

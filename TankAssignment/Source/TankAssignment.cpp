@@ -50,8 +50,7 @@ extern TUInt32 ViewportWidth;
 extern TUInt32 ViewportHeight;
 
 // Current mouse position
-extern TUInt32 MouseX;
-extern TUInt32 MouseY;
+extern CVector2 MousePixel;
 
 // Messenger class for sending messages to and between entities
 extern CMessenger Messenger;
@@ -67,12 +66,15 @@ CEntityManager EntityManager;
 // Tank UIDs
 TEntityUID TankA;
 TEntityUID TankB;
+int totalNumberOfTanks = 2;
 
 // Other scene elements
 const int NumLights = 2;
 CLight*  Lights[NumLights];
 SColourRGBA AmbientLight;
 CCamera* MainCamera;
+bool chaseCam = false;
+int currentTankWatched = 0;
 
 // Sum of recent update times and number of times in the sum - used to calculate
 // average over a given time period
@@ -80,12 +82,11 @@ float SumUpdateTimes = 0.0f;
 int NumUpdateTimes = 0;
 float AverageUpdateTime = -1.0f; // Invalid value at first
 
-// Extras
+// User Interface
 bool ExtendedInfo = true;
-
-// Current mouse position
-CVector2 MousePixel;
-
+TEntityUID nearestTank = -1;
+TEntityUID currentlySelectedTank = -1;
+CVector3 MouseTarget3DPos;
 
 //-----------------------------------------------------------------------------
 // Scene management
@@ -261,33 +262,50 @@ void RenderSceneText( float updateTime )
 {
 	stringstream outText;
 	float mouseDistance = INFINITY;
-	TEntityUID NearestTank;
+
+	// Nearest tank
+	for (int i = 0; i < 2; ++i)
+	{
+		const auto tankUID = GetTankUID(i);
+		auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
+		CVector2 entityScreenPos;
+		if (tank != nullptr && MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
+		{
+			const float entMouseDistance = Distance(MousePixel, entityScreenPos);
+			if (mouseDistance > entMouseDistance)
+			{
+				mouseDistance = entMouseDistance;
+				nearestTank = tankUID;
+			}
+		}
+	}
+
 	// display tanks info
 	for (int i = 0; i < 2; ++i)
 	{
-		auto tankUID = GetTankUID(i);
+		const auto tankUID = GetTankUID(i);
 		auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
+		if (tank == nullptr)
+			continue;
 		outText << tank->Template()->GetName() << '\n';
 		if (ExtendedInfo)
 		{
 			outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
 			outText << "State: " << tank->GetState() << '\n';
 		}
+		if (currentlySelectedTank == tankUID)
+		{
+			outText << "*Selected*\n";
+		}
 		CVector2 entityScreenPos;
 		if (MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
 		{
-			float entMouseDistance = Distance(MousePixel, entityScreenPos);
-			if (mouseDistance > entMouseDistance)
-			{
-				mouseDistance = entMouseDistance;
-				NearestTank = tankUID;
-			}
-			if (NearestTank == tankUID)
+			if (nearestTank == tankUID)
 				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 0.0f, 0.0f, true);
 			else
 				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 1.0f, 0.0f, true);
-			outText.str("");
 		}
+		outText.str("");
 	}
 
 	// Accumulate update times to calculate the average over a given period
@@ -317,34 +335,20 @@ void UpdateScene( float updateTime )
 	// Call all entity update functions
 	EntityManager.UpdateAllEntities( updateTime );
 
-	// picker
+	// Picker
 	if (KeyHit(EKeyCode::Mouse_LButton))
 	{
-		// Get nearest tank to mouse
-		float mouseDistance = INFINITY;
-		TEntityUID NearestTank;
+		currentlySelectedTank = nearestTank;
+	}
 
-		for (int i = 0; i < 2; ++i)
-		{
-			auto tankUID = GetTankUID(i);
-			CEntity* entity = EntityManager.GetEntityAtIndex(tankUID);
-			CVector2 entityScreenPos;
-			if (MainCamera->PixelFromWorldPt(&entityScreenPos, entity->Position(), ViewportWidth, ViewportHeight))
-			{
-				float entMouseDistance = Distance(MousePixel, entityScreenPos);
-				if (mouseDistance > entMouseDistance)
-				{
-					mouseDistance = entMouseDistance;
-					NearestTank = tankUID;
-				}
-			}
-		}
-
-		// Set state
+	// Move to
+	if (KeyHit(EKeyCode::Mouse_RButton) && currentlySelectedTank != -1)
+	{
+		MouseTarget3DPos = MainCamera->WorldPtFromPixel(MousePixel.x, MousePixel.y, ViewportWidth, ViewportHeight);
 		SMessage msg;
-		msg.type = EMessageType::Msg_TankEvade;
+		msg.type = EMessageType::Msg_TankGoto;
 		msg.from = SystemUID;
-		Messenger.SendMessage(NearestTank, msg);
+		Messenger.SendMessage(currentlySelectedTank, msg);
 	}
 
 	// Set camera speeds
@@ -397,9 +401,48 @@ void UpdateScene( float updateTime )
 		Messenger.SendMessage(TankB, msg);
 	}
 
-	// Move the camera
-	MainCamera->Control( Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D, 
-	                     CameraMoveSpeed * updateTime, CameraRotSpeed * updateTime );
+	// last tank on camera
+	if (KeyHit(Key_7))
+	{
+		--currentTankWatched;
+		if (currentTankWatched < 0)
+			currentTankWatched = totalNumberOfTanks - 1;
+	}
+
+	// next tank on camera
+	if (KeyHit(Key_8))
+	{
+		currentTankWatched++;
+		if (currentTankWatched >= totalNumberOfTanks)
+			currentTankWatched = 0;
+	}
+
+	// Camera mode
+	if (KeyHit(Key_9))
+	{
+		chaseCam = !chaseCam;
+	}
+
+	// Update chase cam
+	if (chaseCam)
+	{
+		const auto tankUID = GetTankUID(currentTankWatched);
+		auto tank = EntityManager.GetEntity(tankUID);
+		if (tank != nullptr)
+		{
+			MainCamera->Position() = tank->Position() + tank->Matrix().ZAxis() * -15.0f + CVector3(0, 5.0f, 0);
+			MainCamera->Matrix().FaceTarget(tank->Position() + CVector3(0, 5.0f, 0));
+		}
+	}
+	else
+	{
+		// Move the camera
+		MainCamera->Control(Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D,
+			CameraMoveSpeed * updateTime, CameraRotSpeed * updateTime);
+	}
+	
+
+	
 }
 
 
