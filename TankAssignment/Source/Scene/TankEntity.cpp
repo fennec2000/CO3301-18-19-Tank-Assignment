@@ -36,10 +36,7 @@
 namespace gen
 {
 
-// temp waypoints
-	const TUInt32 waypointMax = 2;
-	const CVector3 waypoints[2][waypointMax] = {	{CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f)},
-									{CVector3(30.0f, 0.5f, 20.0f),		CVector3(30.0f, 0.5f, -20.0f)} };
+// temp const
 	const TFloat32 Epsilon = 0.1f;
 	const TFloat32 waypointRadious = 2.5f;
 	const TFloat32 turretAngularVision = ToRadians(15);
@@ -64,6 +61,10 @@ extern CMessenger Messenger;
 extern TEntityUID GetTankUID( int team );
 
 extern CVector3 MouseTarget3DPos;
+
+// waypoints
+extern unsigned int GetMaxWaypoints(unsigned int team);
+extern CVector3 GetWaypoint(unsigned int team, unsigned int waypoint);
 
 /*-----------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -159,7 +160,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		{
 		case EMessageType::Msg_TankStart:
 			m_State = EState::Patrol;
-			m_TargetPosition = waypoints[m_Team][m_Waypoint];
+			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
 			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 			break;
 		case EMessageType::Msg_TankStop:
@@ -195,13 +196,13 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	if (m_State == EState::Patrol)
 	{
 		// check if at waypoint
-		if (Distance(waypoints[m_Team][m_Waypoint], Position()) <= waypointRadious)
+		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 		{
 			// next waypoint and face target
 			++m_Waypoint;
-			if (m_Waypoint >= waypointMax)
+			if (m_Waypoint >= GetMaxWaypoints(m_Team))
 				m_Waypoint = 0;
-			m_TargetPosition = waypoints[m_Team][m_Waypoint];
+			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
 		}
 
 		// target in range
@@ -274,7 +275,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 		{
 			m_State = EState::Patrol;
-			m_TargetPosition = waypoints[m_Team][m_Waypoint];
+			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
 			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 		}
 

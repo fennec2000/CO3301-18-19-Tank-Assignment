@@ -68,6 +68,9 @@ TEntityUID TankA;
 TEntityUID TankB;
 int totalNumberOfTanks = 2;
 
+// Tank waypoints - list of lists of CVectro3 variable(team)(wapoint)
+vector<vector<CVector3>> TeamWaypoints;
+
 // Other scene elements
 const int NumLights = 2;
 CLight*  Lights[NumLights];
@@ -163,7 +166,33 @@ bool SceneSetup()
 	// Ambient light level
 	AmbientLight = SColourRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
+	// team waypoints
+	const vector<CVector3> listAWaypoints = { CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f),
+									CVector3(-50.0f, 0.5f, 0.0f),	CVector3(-70.0f, 0.5f, 20.0f), 
+									CVector3(-70.0f, 0.5f, -20.0f),	CVector3(-50.0f, 0.5f, 0.0f) };
+	const vector<CVector3> listBWaypoints = { CVector3(30.0f, 0.5f, -20.0f),	CVector3(30.0f, 0.5f, 20.0f),
+									CVector3(50.0f, 0.5f, 0.0f),	CVector3(70.0f, 0.5f, 20.0f),
+									CVector3(70.0f, 0.5f, -20.0f),	CVector3(50.0f, 0.5f, 0.0f) };
+	TeamWaypoints.push_back(listAWaypoints);
+	TeamWaypoints.push_back(listBWaypoints);
+
 	return true;
+}
+
+// waypoint functions
+unsigned int GetMaxTeams()
+{
+	return TeamWaypoints.size();
+}
+
+unsigned int GetMaxWaypoints(unsigned int team)
+{
+	return TeamWaypoints[team].size();
+}
+
+CVector3 GetWaypoint(unsigned int team, unsigned int waypoint)
+{
+	return TeamWaypoints[team][waypoint];
 }
 
 
