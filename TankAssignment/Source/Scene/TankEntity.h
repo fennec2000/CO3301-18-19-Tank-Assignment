@@ -35,7 +35,8 @@ public:
 	(
 		const string& type, const string& name, const string& meshFilename,
 		TFloat32 maxSpeed, TFloat32 acceleration, TFloat32 turnSpeed,
-		TFloat32 turretTurnSpeed, TUInt32 maxHP, TUInt32 shellDamage
+		TFloat32 turretTurnSpeed, TUInt32 maxHP, TUInt32 shellDamage, 
+		TFloat32 deceleration = 0.8f
 	) : CEntityTemplate( type, name, meshFilename )
 	{
 		// Set tank template values
@@ -45,6 +46,7 @@ public:
 		m_TurretTurnSpeed = turretTurnSpeed;
 		m_MaxHP = maxHP;
 		m_ShellDamage = shellDamage;
+		m_Deceleration = deceleration;
 	}
 
 	// No destructor needed (base class one will do)
@@ -87,6 +89,11 @@ public:
 		return m_ShellDamage;
 	}
 
+	TFloat32 GetDeceleration()
+	{
+		return m_Deceleration;
+	}
+
 
 /////////////////////////////////////
 //	Private interface
@@ -97,6 +104,7 @@ private:
 	TFloat32 m_Acceleration;    // Acceleration  -"-
 	TFloat32 m_TurnSpeed;       // Turn speed    -"-
 	TFloat32 m_TurretTurnSpeed; // Turret turn speed    -"-
+	TFloat32 m_Deceleration;
 
 	TUInt32  m_MaxHP;           // Maximum (initial) HP for this kind of tank
 	TUInt32  m_ShellDamage;     // HP damage caused by shells from this kind of tank
@@ -188,6 +196,8 @@ public:
 	// Return false if the entity is to be destroyed
 	// Keep as a virtual function in case of further derivation
 	virtual bool Update( TFloat32 updateTime );
+
+	pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime);	// function off turning and acceleration to tanks
 	
 
 /////////////////////////////////////
@@ -218,7 +228,8 @@ private:
 	TFloat32 m_Speed; // Current speed (in facing direction)
 	TInt32   m_HP;    // Current hit points for the tank
 	TFloat32 m_TurretSpeed;		// turn rate of the turret per frame
-	TFloat32 m_Countdown;			// delay for tank between actions
+	TFloat32 m_Countdown;		// delay for tank between actions
+	TFloat32 m_TurnSpeed;		// tank turn speed
 
 	// Tank state
 	EState   m_State; // Current state

@@ -44,7 +44,7 @@ namespace gen
 	const TFloat32 waypointRadious = 2.5f;
 	const TFloat32 turretAngularVision = ToRadians(15);
 	const TFloat32 turretAimSpeedMultiplyer = 3.0f;
-	const TFloat32 turretMinRotation = 0.001f;
+	const TFloat32 minRotation = 0.001f;
 	const TFloat32 barrelLenght = 4.0f;
 
 	// random
@@ -98,6 +98,50 @@ CTankEntity::CTankEntity
 	m_Countdown = 0;
 	m_TargetPosition = {0, 0, 0};
 	m_TurretSpeed = 0;
+	m_TurnSpeed = 0;
+}
+
+pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime)
+{
+	pair<TFloat32, TFloat32> result(0, 0);
+
+	const CVector3 targetVector = targetPos - Position();
+	bool inFrount = false;
+
+	if (Dot(Matrix().ZAxis(), targetVector) > 0)
+		inFrount = true;
+
+	bool toRight = false;
+	if (Dot(Matrix().XAxis(), targetVector) > 0)
+		toRight = true;
+
+	// if behind slow down to min
+	if (!inFrount  && m_Speed > -m_TankTemplate->GetMaxSpeed()
+		|| Matrix().Position().DistanceTo(targetPos) <= abs(m_Speed * m_Speed / (2 * m_TankTemplate->GetDeceleration())))
+	{
+		result.first = m_Speed - m_TankTemplate->GetAcceleration() * updateTime;
+		if (result.first < -m_TankTemplate->GetMaxSpeed())
+			result.first = -m_TankTemplate->GetMaxSpeed();
+	}
+	else if (m_Speed < m_TankTemplate->GetMaxSpeed())
+	{
+		result.first = m_Speed + m_TankTemplate->GetAcceleration() * updateTime;
+		if (result.first > m_TankTemplate->GetMaxSpeed())
+			result.first = m_TankTemplate->GetMaxSpeed();
+	}
+
+	// turn
+	const TFloat32 rotation = Dot(Normalise(Matrix().ZAxis()), Normalise(targetVector));
+	const TFloat32 acosRot = acos(rotation);
+	if (acosRot > minRotation)
+	{
+		if (toRight)
+			result.second = Min(acosRot, m_TankTemplate->GetTurnSpeed());
+		else
+			result.second = Min(acosRot, -m_TankTemplate->GetTurnSpeed());
+	}
+
+	return result;
 }
 
 
@@ -115,8 +159,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		{
 		case EMessageType::Msg_TankStart:
 			m_State = EState::Patrol;
-			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
-			m_Speed = m_TankTemplate->GetMaxSpeed();
+			m_TargetPosition = waypoints[m_Team][m_Waypoint];
 			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 			break;
 		case EMessageType::Msg_TankStop:
@@ -138,14 +181,10 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		case EMessageType::Msg_TankEvade:
 			m_State = EState::Evade;
 			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
-			Matrix().FaceTarget(m_TargetPosition);
-			m_Speed = m_TankTemplate->GetMaxSpeed();
 			break;
 		case EMessageType::Msg_TankGoto:
 			m_State = EState::Evade;
 			m_TargetPosition = MouseTarget3DPos + CVector3(0, 0.5f, 0);
-			Matrix().FaceTarget(m_TargetPosition);
-			m_Speed = m_TankTemplate->GetMaxSpeed();
 			break;
 		}
 	}
@@ -162,27 +201,31 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			++m_Waypoint;
 			if (m_Waypoint >= waypointMax)
 				m_Waypoint = 0;
-
-			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
+			m_TargetPosition = waypoints[m_Team][m_Waypoint];
 		}
 
 		// target in range
-		auto enemyUID = GetTankUID(!m_Team);
+		const auto enemyUID = GetTankUID(!m_Team);
 		auto enemy = EntityManager.GetEntity(enemyUID);
 		if (enemy != nullptr)
 		{
-			auto targetVector = enemy->Position() - Position();
+			const auto targetVector = enemy->Position() - Position();
 			auto turret = Matrix(2) * Matrix();
-			auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+			const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
 
 			if (abs(rotationToTarget) < turretAngularVision)
 			{
 				m_State = EState::Aim;
 				m_TurretSpeed = 0;
 				m_Speed = 0;
+				m_TurnSpeed = 0;
 				m_Countdown = 1.0f;
 			}
 		}
+
+		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+		m_Speed = speedAndTurn.first;
+		m_TurnSpeed = speedAndTurn.second;
 	}
 	else if (m_State == EState::Aim)
 	{
@@ -194,7 +237,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
 		bool toRight = (Dot(targetVector, turret.XAxis()) > 0) ? true : false;
 		TFloat32 acosRot = acos(rotationToTarget);
-		if (acosRot > turretMinRotation)
+		if (acosRot > minRotation)
 		{
 			if (toRight)
 				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
@@ -211,18 +254,16 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			// change state
 			m_State = EState::Evade;
 			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
-			Matrix().FaceTarget(m_TargetPosition);
-			m_Speed = m_TankTemplate->GetMaxSpeed();
 		}
 	}
 	else if (m_State == EState::Evade)
 	{
 		// reset the turret
 		auto turret = Matrix(2) * Matrix();
-		auto rotationToNeutral = Dot(Normalise(Matrix().ZAxis()), Normalise(turret.ZAxis()));
-		bool toRight = (Dot(Matrix().ZAxis(), turret.XAxis()) > 0) ? true : false;
-		TFloat32 acosRot = acos(rotationToNeutral);
-		if (acosRot > turretMinRotation)
+		const auto rotationToNeutral = Dot(Normalise(Matrix().ZAxis()), Normalise(turret.ZAxis()));
+		const bool toRight = (Dot(Matrix().ZAxis(), turret.XAxis()) > 0) ? true : false;
+		const TFloat32 acosRot = acos(rotationToNeutral);
+		if (acosRot > minRotation)
 		{
 			if (toRight)
 				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
@@ -233,9 +274,13 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 		{
 			m_State = EState::Patrol;
-			Matrix().FaceTarget(waypoints[m_Team][m_Waypoint]);
+			m_TargetPosition = waypoints[m_Team][m_Waypoint];
 			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
 		}
+
+		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+		m_Speed = speedAndTurn.first;
+		m_TurnSpeed = speedAndTurn.second;
 	}
 	else	// EState::Inactive and catches unknown states
 	{
@@ -244,7 +289,10 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 	// Perform movement...
 	// Move along local Z axis scaled by update time
-	Matrix().MoveLocalZ( m_Speed * updateTime );
+	Matrix().MoveLocalZ( m_Speed * updateTime);
+	Matrix().RotateLocalY(m_TurnSpeed * updateTime);
+
+	// turret
 	Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
 
 	// countdown
