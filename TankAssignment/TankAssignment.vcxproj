@@ -121,6 +121,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Data\CParseLevel.cpp" />
+    <ClCompile Include="Source\Data\CParseXML.cpp" />
     <ClCompile Include="Source\Scene\Camera.cpp" />
     <ClCompile Include="Source\Scene\Entity.cpp" />
     <ClCompile Include="Source\Scene\EntityManager.cpp" />
@@ -151,6 +153,8 @@
     <ClCompile Include="Source\TankAssignment.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Data\CParseLevel.h" />
+    <ClInclude Include="Source\Data\CParseXML.h" />
     <ClInclude Include="Source\Scene\Camera.h" />
     <ClInclude Include="Source\Scene\Entity.h" />
     <ClInclude Include="Source\Scene\EntityManager.h" />
@@ -186,6 +190,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Render\TankAssignment.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Entities.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

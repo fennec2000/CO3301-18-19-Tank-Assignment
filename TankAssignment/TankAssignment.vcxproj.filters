@@ -19,6 +19,9 @@
     <Filter Include="Math">
       <UniqueIdentifier>{7424d7d2-c818-4117-bbab-d74c82b531aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{0588a2f5-2ac0-44c8-a3fd-878fbe934517}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene\Camera.cpp">
@@ -100,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="Source\Scene\TankEntity.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Data\CParseLevel.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Data\CParseXML.cpp">
+      <Filter>Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -197,10 +206,19 @@
     <ClInclude Include="Source\Scene\TankEntity.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Data\CParseLevel.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Data\CParseXML.h">
+      <Filter>Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Render\TankAssignment.fx">
       <Filter>Render</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Entities.xml" />
   </ItemGroup>
 </Project>

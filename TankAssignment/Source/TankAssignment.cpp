@@ -18,6 +18,7 @@ using namespace std;
 #include "EntityManager.h"
 #include "Messenger.h"
 #include "TankAssignment.h"
+#include "CParseLevel.h"
 
 namespace gen
 {
@@ -60,8 +61,9 @@ extern CMessenger Messenger;
 // Global game/scene variables
 //-----------------------------------------------------------------------------
 
-// Entity manager
+// Entity manager and level parser
 CEntityManager EntityManager;
+CParseLevel LevelParser(&EntityManager);
 
 // Tank UIDs
 TEntityUID TankA;
