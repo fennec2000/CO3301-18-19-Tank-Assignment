@@ -170,6 +170,23 @@ public:
 		return 0;
 	}
 
+	// Return the entityUUID with the given name & optionally the given template name & type
+	TEntityUID GetEntityUUID(const string& name, const string& templateName = "",
+		const string& templateType = "")
+	{
+		TEntityIter entity = m_Entities.begin();
+		while (entity != m_Entities.end())
+		{
+			if ((*entity)->GetName() == name &&
+				(templateName.length() == 0 || (*entity)->Template()->GetName() == templateName) &&
+				(templateType.length() == 0 || (*entity)->Template()->GetType() == templateType))
+			{
+				return (*entity)->GetUID();
+			}
+			++entity;
+		}
+		return 0;
+	}
 
 	// Begin an enumeration of entities matching given name, template name and type
 	// An empty string indicates to match anything in this field (would be nice to support

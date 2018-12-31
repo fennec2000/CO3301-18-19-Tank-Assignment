@@ -105,53 +105,13 @@ bool SceneSetup()
 
 	InitialiseMethods();
 
+	//////////////////////////////////////////////
+	// Parse level's XML
+	LevelParser.ParseFile("Entities.xml");
 
-	//////////////////////////////////////////
-	// Create scenery templates and entities
-
-	// Create scenery templates - loads the meshes
-	// Template type, template name, mesh name
-	EntityManager.CreateTemplate("Scenery", "Skybox", "Skybox.x");
-	EntityManager.CreateTemplate("Scenery", "Floor", "Floor.x");
-	EntityManager.CreateTemplate("Scenery", "Building", "Building.x");
-	EntityManager.CreateTemplate("Scenery", "Tree", "Tree1.x");
-
-	// Creates scenery entities
-	// Type (template name), entity name, position, rotation, scale
-	EntityManager.CreateEntity("Skybox", "Skybox", CVector3(0.0f, -10000.0f, 0.0f), CVector3::kZero, CVector3(10, 10, 10));
-	EntityManager.CreateEntity("Floor", "Floor");
-	EntityManager.CreateEntity("Building", "Building", CVector3(0.0f, 0.0f, 40.0f));
-	for (int tree = 0; tree < 100; ++tree)
-	{
-		// Some random trees
-		EntityManager.CreateEntity( "Tree", "Tree",
-			                        CVector3(Random(-200.0f, 30.0f), 0.0f, Random(40.0f, 150.0f)),
-			                        CVector3(0.0f, Random(0.0f, 2.0f * kfPi), 0.0f) );
-	}
-
-
-	/////////////////////////////////
-	// Create tank templates
-
-	// Template type, template name, mesh name, top speed, acceleration, tank turn speed, turret
-	// turn speed, max HP and shell damage. These latter settings are for advanced requirements only
-	EntityManager.CreateTankTemplate("Tank", "Rogue Scout", "HoverTank02.x",
-		24.0f, 2.2f, 2.0f, kfPi / 3, 100, 20);
-	EntityManager.CreateTankTemplate("Tank", "Oberon MkII", "HoverTank07.x",
-		18.0f, 1.6f, 1.3f, kfPi / 4, 120, 35);
-
-	// Template for tank shell
-	EntityManager.CreateTemplate("Projectile", "Shell Type 1", "Bullet.x");
-
-
-	////////////////////////////////
-	// Create tank entities
-
-	// Type (template name), team number, tank name, position, rotation
-	TankA = EntityManager.CreateTank("Rogue Scout", 0, "A-1", CVector3(-30.0f, 0.5f, -20.0f),
-		CVector3(0.0f, ToRadians(0.0f), 0.0f));
-	TankB = EntityManager.CreateTank("Oberon MkII", 1, "B-1", CVector3(30.0f, 0.5f, 20.0f),
-		CVector3(0.0f, ToRadians(180.0f), 0.0f));
+	// Tank groups setup
+	TankA = EntityManager.GetEntityUUID("A-1");
+	TankB = EntityManager.GetEntityUUID("B-1");
 
 
 	/////////////////////////////
@@ -298,7 +258,7 @@ void RenderSceneText( float updateTime )
 	for (int i = 0; i < 2; ++i)
 	{
 		const auto tankUID = GetTankUID(i);
-		auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
+		auto tank = EntityManager.GetEntity(tankUID);
 		CVector2 entityScreenPos;
 		if (tank != nullptr && MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
 		{

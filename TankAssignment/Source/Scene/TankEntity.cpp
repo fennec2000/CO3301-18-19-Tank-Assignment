@@ -232,8 +232,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	{
 		// aim
 		auto enemyUID = GetTankUID(!m_Team);
-		auto enemy = 
-			Manager.GetEntity(enemyUID);
+		auto enemy = EntityManager.GetEntity(enemyUID);
 		auto targetVector = enemy->Position() - Position();
 		auto turret = Matrix(2) * Matrix();
 		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
