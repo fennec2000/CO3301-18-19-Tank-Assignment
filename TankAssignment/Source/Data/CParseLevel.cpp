@@ -138,6 +138,7 @@ void CParseLevel::EntitiesStartElt( const string& eltName, SAttribute* attrs )
 	{
 		m_EntityType = GetAttribute( attrs, "Type" );
 		m_EntityName = GetAttribute( attrs, "Name" );
+		m_TankTeam = GetAttributeInt(attrs, "Team", -1);
 		m_EntityNumber = GetAttributeInt( attrs, "Number", 1 );
 
 		// Set default positions
