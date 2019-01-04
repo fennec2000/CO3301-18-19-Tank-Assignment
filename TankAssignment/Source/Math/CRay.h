@@ -22,6 +22,7 @@ private:
 public:
 	CRay(CEntityManager* entityManager);
 	bool HitBuilding(CVector3 origin, CVector3 direction, CVector3 target);
+	void Setup();	// Setup ray after map has loaded
 	~CRay();
 };
 }

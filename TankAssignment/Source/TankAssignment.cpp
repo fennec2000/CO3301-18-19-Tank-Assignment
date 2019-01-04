@@ -19,6 +19,7 @@ using namespace std;
 #include "Messenger.h"
 #include "TankAssignment.h"
 #include "CParseLevel.h"
+#include "CRay.h"
 
 namespace gen
 {
@@ -65,6 +66,9 @@ extern CMessenger Messenger;
 CEntityManager EntityManager;
 CParseLevel LevelParser(&EntityManager);
 
+// ray
+CRay Ray(&EntityManager);
+
 // Tank UIDs
 TEntityUID TankA;
 TEntityUID TankB;
@@ -108,6 +112,7 @@ bool SceneSetup()
 	//////////////////////////////////////////////
 	// Parse level's XML
 	LevelParser.ParseFile("Entities.xml");
+	Ray.Setup();
 
 	// Tank groups setup
 	TankA = EntityManager.GetEntityUUID("A-1");

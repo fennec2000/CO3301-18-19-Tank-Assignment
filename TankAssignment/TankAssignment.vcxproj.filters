@@ -110,7 +110,7 @@
     <ClCompile Include="Source\Data\CParseXML.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    <ClCompile Include="CRay.cpp">
+    <ClCompile Include="Source\Math\CRay.cpp">
       <Filter>Math</Filter>
     </ClCompile>
   </ItemGroup>
@@ -215,7 +215,7 @@
     <ClInclude Include="Source\Data\CParseXML.h">
       <Filter>Data</Filter>
     </ClInclude>
-    <ClInclude Include="CRay.h">
+    <ClInclude Include="Source\Math\CRay.h">
       <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>

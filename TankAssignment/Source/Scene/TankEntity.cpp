@@ -31,7 +31,8 @@
 #include "EntityManager.h"
 #include "Messenger.h"
 #include "CVector3.h"	// temp for waypoints
-#include <random>	// random for random pos
+#include "CRay.h"		// Ray
+#include <random>		// random for random pos
 
 namespace gen
 {
@@ -65,6 +66,9 @@ extern CVector3 MouseTarget3DPos;
 // waypoints
 extern unsigned int GetMaxWaypoints(unsigned int team);
 extern CVector3 GetWaypoint(unsigned int team, unsigned int waypoint);
+
+// ray
+extern CRay Ray;
 
 /*-----------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -214,7 +218,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			auto turret = Matrix(2) * Matrix();
 			const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
 
-			if (abs(rotationToTarget) < turretAngularVision)
+			if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
 			{
 				m_State = EState::Aim;
 				m_TurretSpeed = 0;
@@ -248,13 +252,24 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 		if (m_Countdown <= 0)
 		{
-			// fire
-			auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0,0,0));
-			EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
+			if (!Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+			{
+				// fire
+				auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
+				EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
+			}
 
 			// change state
 			m_State = EState::Evade;
 			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+		}
+
+		// countdown
+		else
+		{
+			m_Countdown -= updateTime;
+			if (m_Countdown <= 0)
+				m_Countdown = 0;
 		}
 	}
 	else if (m_State == EState::Evade)
@@ -295,14 +310,6 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 	// turret
 	Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
-
-	// countdown
-	if (m_Countdown > 0)
-	{
-		m_Countdown -= updateTime;
-		if (m_Countdown <= 0)
-			m_Countdown = 0;
-	}
 
 	// mgs to display text on screen
 	msg.type = EMessageType::Msg_DisplayEntityInfo;
