@@ -139,6 +139,7 @@
     <ClCompile Include="Source\Render\CImportXFile.cpp" />
     <ClCompile Include="Source\Scene\ShellEntity.cpp" />
     <ClCompile Include="Source\Scene\TankEntity.cpp" />
+    <ClCompile Include="Source\Scene\TeamManager.cpp" />
     <ClCompile Include="Source\UI\Input.cpp" />
     <ClCompile Include="Source\Math\BaseMath.cpp" />
     <ClCompile Include="Source\Math\CMatrix2x2.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="Source\Render\MeshData.h" />
     <ClInclude Include="Source\Scene\ShellEntity.h" />
     <ClInclude Include="Source\Scene\TankEntity.h" />
+    <ClInclude Include="Source\Scene\TeamManager.h" />
     <ClInclude Include="Source\UI\Input.h" />
     <ClInclude Include="Source\Math\BaseMath.h" />
     <ClInclude Include="Source\Math\CMatrix2x2.h" />

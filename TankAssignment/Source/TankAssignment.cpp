@@ -20,6 +20,7 @@ using namespace std;
 #include "TankAssignment.h"
 #include "CParseLevel.h"
 #include "CRay.h"
+#include "TeamManager.h"
 
 namespace gen
 {
@@ -64,15 +65,15 @@ extern CMessenger Messenger;
 
 // Entity manager and level parser
 CEntityManager EntityManager;
-CParseLevel LevelParser(&EntityManager);
+
+// Tank UIDs
+CTeamManager TeamManager;
+
+// Parse level
+CParseLevel LevelParser(&EntityManager, &TeamManager);
 
 // ray
 CRay Ray(&EntityManager);
-
-// Tank UIDs
-TEntityUID TankA;
-TEntityUID TankB;
-int totalNumberOfTanks = 2;
 
 // Tank waypoints - list of lists of CVectro3 variable(team)(wapoint)
 vector<vector<CVector3>> TeamWaypoints;
@@ -112,11 +113,10 @@ bool SceneSetup()
 	//////////////////////////////////////////////
 	// Parse level's XML
 	LevelParser.ParseFile("Entities.xml");
-	Ray.Setup();
 
-	// Tank groups setup
-	TankA = EntityManager.GetEntityUUID("A-1");
-	TankB = EntityManager.GetEntityUUID("B-1");
+	//////////////////////////////////////////////
+	// Setups
+	Ray.Setup();
 
 
 	/////////////////////////////
@@ -188,11 +188,6 @@ void SceneShutdown()
 // Game Helper functions
 //-----------------------------------------------------------------------------
 
-// Get UID of tank A (team 0) or B (team 1)
-TEntityUID GetTankUID(int team)
-{
-	return (team == 0) ? TankA : TankB;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -260,48 +255,57 @@ void RenderSceneText( float updateTime )
 	float mouseDistance = INFINITY;
 
 	// Nearest tank
-	for (int i = 0; i < 2; ++i)
+	const int NumOfTeams = TeamManager.GetNumberOfTeams();
+	for (int i = 0; i < NumOfTeams; ++i)
 	{
-		const auto tankUID = GetTankUID(i);
-		auto tank = EntityManager.GetEntity(tankUID);
-		CVector2 entityScreenPos;
-		if (tank != nullptr && MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
+		const int teamSize = TeamManager.GetTeamSize(i);
+		for (int j = 0; j < teamSize; ++j)
 		{
-			const float entMouseDistance = Distance(MousePixel, entityScreenPos);
-			if (mouseDistance > entMouseDistance)
+			const auto tankUID = TeamManager.GetTankUID(i, j);
+			auto tank = EntityManager.GetEntity(tankUID);
+			CVector2 entityScreenPos;
+			if (tank != nullptr && MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
 			{
-				mouseDistance = entMouseDistance;
-				nearestTank = tankUID;
+				const float entMouseDistance = Distance(MousePixel, entityScreenPos);
+				if (mouseDistance > entMouseDistance)
+				{
+					mouseDistance = entMouseDistance;
+					nearestTank = tankUID;
+				}
 			}
 		}
 	}
 
 	// display tanks info
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < NumOfTeams; ++i)
 	{
-		const auto tankUID = GetTankUID(i);
-		auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
-		if (tank == nullptr)
-			continue;
-		outText << tank->Template()->GetName() << '\n';
-		if (ExtendedInfo)
+		const int teamSize = TeamManager.GetTeamSize(i);
+		for (int j = 0; j < teamSize; ++j)
 		{
-			outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
-			outText << "State: " << tank->GetState() << '\n';
+			const auto tankUID = TeamManager.GetTankUID(i, j);
+			auto tank = dynamic_cast<CTankEntity*>(EntityManager.GetEntity(tankUID));
+			if (tank == nullptr)
+				continue;
+			outText << tank->Template()->GetName() << '\n';
+			if (ExtendedInfo)
+			{
+				outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
+				outText << "State: " << tank->GetState() << '\n';
+			}
+			if (currentlySelectedTank == tankUID)
+			{
+				outText << "*Selected*\n";
+			}
+			CVector2 entityScreenPos;
+			if (MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
+			{
+				if (nearestTank == tankUID)
+					RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 0.0f, 0.0f, true);
+				else
+					RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 1.0f, 0.0f, true);
+			}
+			outText.str("");
 		}
-		if (currentlySelectedTank == tankUID)
-		{
-			outText << "*Selected*\n";
-		}
-		CVector2 entityScreenPos;
-		if (MainCamera->PixelFromWorldPt(&entityScreenPos, tank->Position(), ViewportWidth, ViewportHeight))
-		{
-			if (nearestTank == tankUID)
-				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 0.0f, 0.0f, true);
-			else
-				RenderText(outText.str(), entityScreenPos.x, entityScreenPos.y, 1.0f, 1.0f, 0.0f, true);
-		}
-		outText.str("");
 	}
 
 	// Accumulate update times to calculate the average over a given period
@@ -358,43 +362,76 @@ void UpdateScene( float updateTime )
 
 	// System messages
 	// Go
+
 	if (KeyHit(Key_1))
 	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
 		SMessage msg;
 		msg.type = EMessageType::Msg_TankStart;
 		msg.from = SystemUID;
-		Messenger.SendMessage(TankA, msg);
-		Messenger.SendMessage(TankB, msg);
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = TeamManager.GetTeamSize(i);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(i, j);
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
 	}
 
 	// Stop
 	if (KeyHit(Key_2))
 	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
 		SMessage msg;
 		msg.type = EMessageType::Msg_TankStop;
 		msg.from = SystemUID;
-		Messenger.SendMessage(TankA, msg);
-		Messenger.SendMessage(TankB, msg);
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = TeamManager.GetTeamSize(i);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(i, j);
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
 	}
 
 	// Aim
 	if (KeyHit(Key_3))
 	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
 		SMessage msg;
 		msg.type = EMessageType::Msg_TankAim;
 		msg.from = SystemUID;
-		Messenger.SendMessage(TankA, msg);
-		Messenger.SendMessage(TankB, msg);
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = TeamManager.GetTeamSize(i);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(i, j);
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
 	}
 
 	// Hit
 	if (KeyHit(Key_4))
 	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
 		SMessage msg;
 		msg.type = EMessageType::Msg_TankHit;
 		msg.from = SystemUID;
-		Messenger.SendMessage(TankA, msg);
-		Messenger.SendMessage(TankB, msg);
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = TeamManager.GetTeamSize(i);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(i, j);
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
 	}
 
 	// last tank on camera
@@ -402,14 +439,14 @@ void UpdateScene( float updateTime )
 	{
 		--currentTankWatched;
 		if (currentTankWatched < 0)
-			currentTankWatched = totalNumberOfTanks - 1;
+			currentTankWatched = TeamManager.GetTotalNumberOfTanks() - 1;
 	}
 
 	// next tank on camera
 	if (KeyHit(Key_8))
 	{
 		currentTankWatched++;
-		if (currentTankWatched >= totalNumberOfTanks)
+		if (currentTankWatched >= TeamManager.GetTotalNumberOfTanks())
 			currentTankWatched = 0;
 	}
 
@@ -422,7 +459,15 @@ void UpdateScene( float updateTime )
 	// Update chase cam
 	if (chaseCam)
 	{
-		const auto tankUID = GetTankUID(currentTankWatched);
+		int team = 0;
+		int tankInTeam = currentTankWatched;
+		while (currentTankWatched > TeamManager.GetTeamSize(team))
+		{
+			tankInTeam -= TeamManager.GetTeamSize(team);
+			++team;
+		}
+
+		const auto tankUID = TeamManager.GetTankUID(team, tankInTeam);
 		auto tank = EntityManager.GetEntity(tankUID);
 		if (tank != nullptr)
 		{

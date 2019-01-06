@@ -18,10 +18,11 @@ namespace gen
 ---------------------------------------------------------------------------------------------*/
 
 // Constructor initialises state variables
-CParseLevel::CParseLevel( CEntityManager* entityManager )
+CParseLevel::CParseLevel( CEntityManager* entityManager, CTeamManager* teamManager )
 {
 	// Take copy of entity manager for creation
 	m_EntityManager = entityManager;
+	m_TeamManager = teamManager;
 
 	// File state
 	m_CurrentSection = None;
@@ -228,7 +229,10 @@ void CParseLevel::EntitiesEndElt( const string& eltName )
 			TEntityUID entityUID;
 			auto result = find(begin(m_TankNames), end(m_TankNames), m_EntityType);
 			if (result != end(m_TankNames))
+			{
 				entityUID = m_EntityManager->CreateTank(m_EntityType, m_TankTeam, m_EntityName);
+				m_TeamManager->AddTank(entityUID, m_TankTeam);
+			}
 			else
 				entityUID = m_EntityManager->CreateEntity(m_EntityType, m_EntityName);
 

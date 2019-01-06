@@ -59,9 +59,12 @@ extern CMessenger Messenger;
 
 // Helper function made available from TankAssignment.cpp - gets UID of tank A (team 0) or B (team 1).
 // Will be needed to implement the required tank behaviour in the Update function below
-extern TEntityUID GetTankUID( int team );
 
 extern CVector3 MouseTarget3DPos;
+
+// teams
+extern const unsigned int NumOfTeams;
+extern vector<TEntityUID> Teams[NumOfTeams];
 
 // waypoints
 extern unsigned int GetMaxWaypoints(unsigned int team);
@@ -210,6 +213,14 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		}
 
 		// target in range
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = Teams[i].size();
+			for (int j = 0; j < teamSize; ++j)
+			{
+				Messenger.SendMessage(Teams[i].size(), msg);
+			}
+		}
 		const auto enemyUID = GetTankUID(!m_Team);
 		auto enemy = EntityManager.GetEntity(enemyUID);
 		if (enemy != nullptr)

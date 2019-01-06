@@ -113,6 +113,9 @@
     <ClCompile Include="Source\Math\CRay.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\TeamManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scene\Camera.h">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="Source\Math\CRay.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene\TeamManager.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -18,6 +18,7 @@ using namespace std;
 #include "CVector3.h"
 #include "EntityManager.h"
 #include "CParseXML.h"
+#include "TeamManager.h"
 
 namespace gen
 {
@@ -39,8 +40,7 @@ class CParseLevel : public CParseXML
 ---------------------------------------------------------------------------------------------*/
 public:
 	// Constructor gets a pointer to the entity manager and initialises state variables
-	CParseLevel( CEntityManager* entityManager );
-
+	CParseLevel(CEntityManager* entityManager, CTeamManager* teamManager);
 	
 /*-----------------------------------------------------------------------------------------
 	Private interface
@@ -101,6 +101,7 @@ private:
 	// Constructer is passed a pointer to an entity manager used to create templates and
 	// entities as they are parsed
 	CEntityManager* m_EntityManager;
+	CTeamManager* m_TeamManager;
 
 	vector<string> m_TankNames; // list of names of tanks for creating tank entity
 
