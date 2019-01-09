@@ -32,6 +32,9 @@
 #include "Messenger.h"
 #include "CVector3.h"	// temp for waypoints
 #include "CRay.h"		// Ray
+#include "TeamManager.h"// team manager
+
+
 #include <random>		// random for random pos
 
 namespace gen
@@ -63,8 +66,7 @@ extern CMessenger Messenger;
 extern CVector3 MouseTarget3DPos;
 
 // teams
-extern const unsigned int NumOfTeams;
-extern vector<TEntityUID> Teams[NumOfTeams];
+extern CTeamManager TeamManager;
 
 // waypoints
 extern unsigned int GetMaxWaypoints(unsigned int team);
@@ -107,6 +109,7 @@ CTankEntity::CTankEntity
 	m_TargetPosition = {0, 0, 0};
 	m_TurretSpeed = 0;
 	m_TurnSpeed = 0;
+	m_Target = 0;
 }
 
 pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime)
@@ -213,29 +216,33 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		}
 
 		// target in range
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
 		for (int i = 0; i < NumOfTeams; ++i)
 		{
-			const int teamSize = Teams[i].size();
+			if (i == m_Team)	// skip own team
+				continue;
+
+			const int teamSize = TeamManager.GetTeamSize(i);
 			for (int j = 0; j < teamSize; ++j)
 			{
-				Messenger.SendMessage(Teams[i].size(), msg);
-			}
-		}
-		const auto enemyUID = GetTankUID(!m_Team);
-		auto enemy = EntityManager.GetEntity(enemyUID);
-		if (enemy != nullptr)
-		{
-			const auto targetVector = enemy->Position() - Position();
-			auto turret = Matrix(2) * Matrix();
-			const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+				const auto enemyUID = TeamManager.GetTankUID(i, j);
+				auto enemy = EntityManager.GetEntity(enemyUID);
+				if (enemy != nullptr)
+				{
+					const auto targetVector = enemy->Position() - Position();
+					auto turret = Matrix(2) * Matrix();
+					const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
 
-			if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
-			{
-				m_State = EState::Aim;
-				m_TurretSpeed = 0;
-				m_Speed = 0;
-				m_TurnSpeed = 0;
-				m_Countdown = 1.0f;
+					if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+					{
+						m_State = EState::Aim;
+						m_TurretSpeed = 0;
+						m_Speed = 0;
+						m_TurnSpeed = 0;
+						m_Countdown = 1.0f;
+						m_Target = enemyUID;
+					}
+				}
 			}
 		}
 
@@ -246,8 +253,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	else if (m_State == EState::Aim)
 	{
 		// aim
-		auto enemyUID = GetTankUID(!m_Team);
-		auto enemy = EntityManager.GetEntity(enemyUID);
+		auto enemy = EntityManager.GetEntity(m_Target);
 		auto targetVector = enemy->Position() - Position();
 		auto turret = Matrix(2) * Matrix();
 		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));

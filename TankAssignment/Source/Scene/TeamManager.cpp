@@ -18,12 +18,13 @@ void gen::CTeamManager::AddTank(TEntityUID tankUID, int team)
 		vector<TEntityUID> emptyTeam;
 		m_Teams.push_back(emptyTeam);
 		++m_NumOfTeams;
+		m_TeamSizes.push_back(0);
 	}
 
 	// add tank
 	m_Teams.at(team).push_back(tankUID);
 	++m_TotalNumberOfTanks;
-	++m_TeamSizes.at(team);
+	++m_TeamSizes[team];
 }
 
 int gen::CTeamManager::GetTeamSize(int team)
@@ -33,7 +34,7 @@ int gen::CTeamManager::GetTeamSize(int team)
 	return m_TeamSizes.at(team);
 }
 
-TEntityUID gen::CTeamManager::GetTankUID(int team, int memberNumber)
+gen::TEntityUID gen::CTeamManager::GetTankUID(int team, int memberNumber)
 {
 	if (m_NumOfTeams < team)
 		return TEntityUID();

@@ -8,6 +8,7 @@
 #include "TankEntity.h"
 #include "EntityManager.h"
 #include "Messenger.h"
+#include "TeamManager.h"
 
 namespace gen
 {
@@ -23,7 +24,7 @@ extern CMessenger Messenger;
 
 // Helper function made available from TankAssignment.cpp - gets UID of tank A (team 0) or B (team 1).
 // Will be needed to implement the required shell behaviour in the Update function below
-extern TEntityUID GetTankUID( int team );
+extern CTeamManager TeamManager;
 
 
 
@@ -59,17 +60,22 @@ bool CShellEntity::Update( TFloat32 updateTime )
 	// movement
 	Matrix().MoveLocalZ(m_Speed * updateTime);
 
-	for (int i = 0; i < 2; ++i)
+	const int NumOfTeams = TeamManager.GetNumberOfTeams();
+	for (int i = 0; i < NumOfTeams; ++i)
 	{
-		auto tankUID = GetTankUID(i);
-		auto tank = EntityManager.GetEntity(tankUID);
-		if (tank != nullptr && Distance(Position(), tank->Position()) < bulletCollisionRadious)
+		const int teamSize = TeamManager.GetTeamSize(i);
+		for (int j = 0; j < teamSize; ++j)
 		{
-			SMessage msg;
-			msg.type = EMessageType::Msg_TankHit;
-			msg.from = SystemUID;
-			Messenger.SendMessage(tankUID, msg);
-			return false;
+			auto tankUID = TeamManager.GetTankUID(i, j);
+			auto tank = EntityManager.GetEntity(tankUID);
+			if (tank != nullptr && Distance(Position(), tank->Position()) < bulletCollisionRadious)
+			{
+				SMessage msg;
+				msg.type = EMessageType::Msg_TankHit;
+				msg.from = SystemUID;
+				Messenger.SendMessage(tankUID, msg);
+				return false;
+			}
 		}
 	}
 

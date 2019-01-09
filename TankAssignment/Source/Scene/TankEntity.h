@@ -238,6 +238,9 @@ private:
 	// waypointing
 	TInt32 m_Waypoint;				// current target waypoint
 	CVector3 m_TargetPosition;	// tanks non waypoint target
+
+	// targeting
+	TEntityUID m_Target;		// current target
 };
 
 
