@@ -82,5 +82,25 @@
     </Entity>
 
   </Entities>
+  
+  <Waypoints>
+    <List>
+      <Waypoint X="-30.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="-30.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="-50.0" Y="0.5" Z="0.0"/>
+      <Waypoint X="-70.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="-70.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="-50.0" Y="0.5" Z="0.0"/>
+    </List>
+    <List>
+      <Waypoint X="30.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="30.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="50.0" Y="0.5" Z="0.0"/>
+      <Waypoint X="70.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="70.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="50.0" Y="0.5" Z="0.0"/>
+    </List>
+  </Waypoints>
+  
   <!-- End of Scene Setup -->
 </Level>

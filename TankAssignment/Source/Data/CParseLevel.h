@@ -57,6 +57,7 @@ private:
 		None,
 		Templates,
 		Entities,
+		Waypoints
 	};
 
 
@@ -89,6 +90,12 @@ private:
 
 	// Called when the parser meets the end of an element (closing tag) in the entities section
 	void EntitiesEndElt( const string& eltName );
+
+	// Called when the parser meets the start of an element (opening tag) in the entities section
+	void WaypointsStartElt(const string& eltName, SAttribute* attrs);
+
+	// Called when the parser meets the end of an element (closing tag) in the entities section
+	void WaypointsEndElt(const string& eltName);
 
 	// Called when the parser meets the start of an element (opening tag) of a entity component
 	void ComponentsStartElt( const string& typeName, SAttribute* attrs );
@@ -126,6 +133,10 @@ private:
 	bool     m_RotRand;      // random flag for rotation
 	CVector3 m_RotRandValue; // size of random
 	CVector3 m_Scale;
+
+	// Current waypoint state (i.e. latest values read during parsing)
+	vector<CVector3> m_List;
+	CVector3         m_WaypointPos;
 };
 
 

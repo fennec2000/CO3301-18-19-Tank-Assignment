@@ -13,6 +13,8 @@
 namespace gen
 {
 
+extern vector<vector<CVector3>> TeamWaypoints;
+
 /*---------------------------------------------------------------------------------------------
 	Constructors / Destructors
 ---------------------------------------------------------------------------------------------*/
@@ -41,6 +43,9 @@ CParseLevel::CParseLevel( CEntityManager* entityManager, CTeamManager* teamManag
 	m_PosRandValue = CVector3::kOrigin;
 	m_Rot = CVector3::kOrigin;
 	m_Scale = CVector3(1.0f, 1.0f, 1.0f);
+
+	// Waypoint state
+	m_WaypointPos = CVector3::kOrigin;
 }
 
 
@@ -62,6 +67,10 @@ void CParseLevel::StartElt( const string& eltName, SAttribute* attrs )
 	{
 		m_CurrentSection = Entities;
 	}
+	else if (eltName == "Waypoints")
+	{
+		m_CurrentSection = Waypoints;
+	}
 
 	// Different parsing depending on section currently being read
 	switch (m_CurrentSection)
@@ -72,6 +81,9 @@ void CParseLevel::StartElt( const string& eltName, SAttribute* attrs )
 		case Entities:
 			EntitiesStartElt( eltName, attrs ); // Parse entity start elements
 			break;
+		case Waypoints:
+			WaypointsStartElt( eltName, attrs );
+			break;
 	}
 }
 
@@ -80,7 +92,7 @@ void CParseLevel::StartElt( const string& eltName, SAttribute* attrs )
 void CParseLevel::EndElt( const string& eltName )
 {
 	// Close major file sections
-	if (eltName == "Templates" || eltName == "Entities")
+	if (eltName == "Templates" || eltName == "Entities" || eltName == "Waypoints")
 	{
 		m_CurrentSection = None;
 	}
@@ -93,6 +105,9 @@ void CParseLevel::EndElt( const string& eltName )
 			break;
 		case Entities:
 			EntitiesEndElt( eltName ); // Parse entity end elements
+			break;
+		case Waypoints:
+			WaypointsEndElt( eltName ); // Parse waypoints end elements
 			break;
 	}
 }
@@ -253,6 +268,35 @@ void CParseLevel::EntitiesEndElt( const string& eltName )
 
 			m_Entity->Matrix().MakeAffineEuler(m_Pos + PosRand, m_Rot + RotRand, kZXY, m_Scale);
 		}
+	}
+}
+
+void CParseLevel::WaypointsStartElt(const string& eltName, SAttribute* attrs)
+{
+	// Started reading a new waypoints
+	if (eltName == "Waypoints")
+	{
+		TeamWaypoints.empty();
+	}
+	else if (eltName == "List")
+	{
+		m_List.empty();
+	}
+	else if (eltName == "Waypoint")
+	{
+		m_WaypointPos.x = GetAttributeFloat(attrs, "X");
+		m_WaypointPos.y = GetAttributeFloat(attrs, "Y");
+		m_WaypointPos.z = GetAttributeFloat(attrs, "Z");
+		m_List.push_back(m_WaypointPos);
+	}
+}
+
+// Called when the parser meets the end of an element (closing tag) in the templates section
+void CParseLevel::WaypointsEndElt(const string& eltName)
+{
+	if (eltName == "List")
+	{
+		TeamWaypoints.push_back(m_List);
 	}
 }
 

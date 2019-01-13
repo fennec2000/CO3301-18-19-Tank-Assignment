@@ -136,15 +136,15 @@ bool SceneSetup()
 	// Ambient light level
 	AmbientLight = SColourRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
-	// team waypoints
-	const vector<CVector3> listAWaypoints = { CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f),
-									CVector3(-50.0f, 0.5f, 0.0f),	CVector3(-70.0f, 0.5f, 20.0f), 
-									CVector3(-70.0f, 0.5f, -20.0f),	CVector3(-50.0f, 0.5f, 0.0f) };
-	const vector<CVector3> listBWaypoints = { CVector3(30.0f, 0.5f, -20.0f),	CVector3(30.0f, 0.5f, 20.0f),
-									CVector3(50.0f, 0.5f, 0.0f),	CVector3(70.0f, 0.5f, 20.0f),
-									CVector3(70.0f, 0.5f, -20.0f),	CVector3(50.0f, 0.5f, 0.0f) };
-	TeamWaypoints.push_back(listAWaypoints);
-	TeamWaypoints.push_back(listBWaypoints);
+	//// team waypoints
+	//const vector<CVector3> listAWaypoints = { CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f),
+	//								CVector3(-50.0f, 0.5f, 0.0f),	CVector3(-70.0f, 0.5f, 20.0f), 
+	//								CVector3(-70.0f, 0.5f, -20.0f),	CVector3(-50.0f, 0.5f, 0.0f) };
+	//const vector<CVector3> listBWaypoints = { CVector3(30.0f, 0.5f, -20.0f),	CVector3(30.0f, 0.5f, 20.0f),
+	//								CVector3(50.0f, 0.5f, 0.0f),	CVector3(70.0f, 0.5f, 20.0f),
+	//								CVector3(70.0f, 0.5f, -20.0f),	CVector3(50.0f, 0.5f, 0.0f) };
+	//TeamWaypoints.push_back(listAWaypoints);
+	//TeamWaypoints.push_back(listBWaypoints);
 
 	return true;
 }
@@ -493,10 +493,5 @@ void UpdateScene( float updateTime )
 		MainCamera->Control(Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D,
 			CameraMoveSpeed * updateTime, CameraRotSpeed * updateTime);
 	}
-	
-
-	
 }
-
-
 } // namespace gen
