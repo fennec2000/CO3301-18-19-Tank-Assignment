@@ -67,7 +67,7 @@ extern CMessenger Messenger;
 CEntityManager EntityManager;
 
 // Tank UIDs
-CTeamManager TeamManager;
+CTeamManager TeamManager(&EntityManager);
 
 // Parse level
 CParseLevel LevelParser(&EntityManager, &TeamManager);
@@ -84,7 +84,7 @@ CLight*  Lights[NumLights];
 SColourRGBA AmbientLight;
 CCamera* MainCamera;
 bool chaseCam = false;
-int currentTankWatched = 0;
+int currentTankWatched[2] = { 0, 0 };	// 0 team 1 member number
 
 // Sum of recent update times and number of times in the sum - used to calculate
 // average over a given time period
@@ -117,6 +117,9 @@ bool SceneSetup()
 	//////////////////////////////////////////////
 	// Setups
 	Ray.Setup();
+	const int teams = TeamManager.GetNumberOfTeams();
+	for(int i = 0; i < teams; ++i)
+		TeamManager.UpdateMembership(i);
 
 
 	/////////////////////////////
@@ -291,6 +294,7 @@ void RenderSceneText( float updateTime )
 			{
 				outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
 				outText << "State: " << tank->GetState() << '\n';
+				outText << "Member: " << tank->GetMembership() << '\n';
 			}
 			if (currentlySelectedTank == tankUID)
 			{
@@ -437,17 +441,33 @@ void UpdateScene( float updateTime )
 	// last tank on camera
 	if (KeyHit(Key_7))
 	{
-		--currentTankWatched;
-		if (currentTankWatched < 0)
-			currentTankWatched = TeamManager.GetTotalNumberOfTanks() - 1;
+		if (currentTankWatched[1] <= 0)
+		{
+			if (currentTankWatched[0] <= 0)
+				currentTankWatched[0] = TeamManager.GetNumberOfTeams() - 1;
+			else
+				--currentTankWatched[0];
+
+			currentTankWatched[1] = TeamManager.GetTeamSize(currentTankWatched[0]) - 1;
+		}
+		else
+			--currentTankWatched[1];
 	}
 
 	// next tank on camera
 	if (KeyHit(Key_8))
 	{
-		currentTankWatched++;
-		if (currentTankWatched >= TeamManager.GetTotalNumberOfTanks())
-			currentTankWatched = 0;
+		if (currentTankWatched[1] + 1 >= TeamManager.GetTeamSize(currentTankWatched[0]))
+		{
+			if (currentTankWatched[0] + 1 >= TeamManager.GetNumberOfTeams())
+				currentTankWatched[0] = 0;
+			else
+				++currentTankWatched[0];
+
+			currentTankWatched[1] = 0;
+		}
+		else
+			++currentTankWatched[1];
 	}
 
 	// Camera mode
@@ -459,15 +479,7 @@ void UpdateScene( float updateTime )
 	// Update chase cam
 	if (chaseCam)
 	{
-		int team = 0;
-		int tankInTeam = currentTankWatched;
-		while (currentTankWatched > TeamManager.GetTeamSize(team))
-		{
-			tankInTeam -= TeamManager.GetTeamSize(team);
-			++team;
-		}
-
-		const auto tankUID = TeamManager.GetTankUID(team, tankInTeam);
+		const auto tankUID = TeamManager.GetTankUID(currentTankWatched[0], currentTankWatched[1]);
 		auto tank = EntityManager.GetEntity(tankUID);
 		if (tank != nullptr)
 		{

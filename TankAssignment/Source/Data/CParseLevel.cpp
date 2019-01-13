@@ -231,7 +231,6 @@ void CParseLevel::EntitiesEndElt( const string& eltName )
 			if (result != end(m_TankNames))
 			{
 				entityUID = m_EntityManager->CreateTank(m_EntityType, m_TankTeam, m_EntityName);
-				m_TeamManager->AddTank(entityUID, m_TankTeam);
 			}
 			else
 				entityUID = m_EntityManager->CreateEntity(m_EntityType, m_EntityName);

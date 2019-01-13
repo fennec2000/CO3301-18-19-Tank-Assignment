@@ -21,14 +21,17 @@ namespace gen
 // Some basic message types
 enum class EMessageType
 {
-	Msg_TankStart,			// Send the start message for tanks
-	Msg_TankStop,			// Send the stop message for tanks
-	Msg_TankHit,			// Send hit to a tank
-	Msg_TankAim,			// Send ain to tank - for testing only
-	Msg_TankEvade,			// send Evade to tank force it into evade state
-	Msg_TankGoto,			// Tell the tank to move to spot
+	Msg_TankStart,				// Send the start message for tanks
+	Msg_TankStop,				// Send the stop message for tanks
+	Msg_TankHit,				// Send hit to a tank
+	Msg_TankAim,				// Send ain to tank - for testing only
+	Msg_TankEvade,				// send Evade to tank force it into evade state
+	Msg_TankGoto,				// Tell the tank to move to spot
+	Msg_TankBecomeTeamLeader,	// Make the tank a team leader
+	Msg_TankBecomeTeamMember,	// Make the tank a team member
+	Msg_TankHelp,				// reqest help
 
-	Msg_DisplayEntityInfo	// display message to screen
+	Msg_DisplayEntityInfo		// display message to screen
 };
 
 // A message contains a type and the UID that sent it.

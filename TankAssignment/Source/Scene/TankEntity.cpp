@@ -34,7 +34,6 @@
 #include "CRay.h"		// Ray
 #include "TeamManager.h"// team manager
 
-
 #include <random>		// random for random pos
 
 namespace gen
@@ -95,6 +94,7 @@ CTankEntity::CTankEntity
 ) : CEntity( tankTemplate, UID, name, position, rotation, scale )
 {
 	m_TankTemplate = tankTemplate;
+	m_UID = UID;
 
 	// Tanks are on teams so they know who the enemy is
 	m_Team = team;
@@ -110,6 +110,9 @@ CTankEntity::CTankEntity
 	m_TurretSpeed = 0;
 	m_TurnSpeed = 0;
 	m_Target = 0;
+	m_MemberState = ETankTeamMembership::solo;
+	m_TeamMemberNumber = TeamManager.AddTank(UID, m_Team);
+	
 }
 
 pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime)
@@ -166,45 +169,86 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	while (Messenger.FetchMessage( GetUID(), &msg ))
 	{
 		// Set state variables based on received messages
-		switch (msg.type)
+		if (msg.type == EMessageType::Msg_TankStart)
 		{
-		case EMessageType::Msg_TankStart:
 			m_State = EState::Patrol;
 			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
 			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
-			break;
-		case EMessageType::Msg_TankStop:
+		}
+		else if (msg.type == EMessageType::Msg_TankStop)
+		{
 			m_State = EState::Inactive;
 			m_Speed = 0;
 			m_TurretSpeed = 0;
-			break;
-		case EMessageType::Msg_TankAim: // temp used to change state
+		}
+		else if (msg.type == EMessageType::Msg_TankAim)
+		{
 			m_State = EState::Aim;
 			m_Speed = 0;
 			m_Countdown = 1.0f;
 			m_TurretSpeed = 0;
-			break;
-		case EMessageType::Msg_TankHit:
+		}
+		else if (msg.type == EMessageType::Msg_TankHit)
+		{
 			m_HP -= 20;
 			if (m_HP <= 0)
+			{
+				TeamManager.UpdateMembership(m_Team);
 				return false;
-			break;
-		case EMessageType::Msg_TankEvade:
+			}
+
+			// request help
+			SMessage msg;
+			msg.type = EMessageType::Msg_TankHelp;
+			msg.from = m_UID;
+			const int teamSize = TeamManager.GetTeamSize(m_Team);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(m_Team, j);
+				if (tankUID == m_UID)
+					continue;
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
+		else if (msg.type == EMessageType::Msg_TankEvade)
+		{
 			m_State = EState::Evade;
 			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
-			break;
-		case EMessageType::Msg_TankGoto:
+		}
+		else if (msg.type == EMessageType::Msg_TankGoto)
+		{
 			m_State = EState::Evade;
 			m_TargetPosition = MouseTarget3DPos + CVector3(0, 0.5f, 0);
-			break;
+		}
+		else if (msg.type == EMessageType::Msg_TankBecomeTeamLeader)
+		{
+			m_MemberState = ETankTeamMembership::teamLeader;
+			m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
+		}
+
+		else if (msg.type == EMessageType::Msg_TankBecomeTeamMember)
+		{
+			m_MemberState = ETankTeamMembership::teamMember;
+			m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
+		}
+
+		else if (msg.type == EMessageType::Msg_TankHelp)
+		{
+			auto hurtTank = EntityManager.GetEntity(msg.from);
+			auto normalVectorToTarget = Normalise(hurtTank->Position() - Position());
+			m_State = EState::Evade;
+			m_TargetPosition = hurtTank->Position() - normalVectorToTarget * teamMemberSpace;
 		}
 	}
 
+
 	// Tank behaviour
 	// Only move if in Go state
-	
 	if (m_State == EState::Patrol)
 	{
+		if (m_MemberState == ETankTeamMembership::teamMember)
+			m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
+
 		// check if at waypoint
 		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 		{
@@ -254,6 +298,10 @@ bool CTankEntity::Update( TFloat32 updateTime )
 	{
 		// aim
 		auto enemy = EntityManager.GetEntity(m_Target);
+		if (enemy == nullptr) // enemy dies
+		{
+			m_State = EState::Patrol;
+		}
 		auto targetVector = enemy->Position() - Position();
 		auto turret = Matrix(2) * Matrix();
 		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
@@ -274,11 +322,15 @@ bool CTankEntity::Update( TFloat32 updateTime )
 				// fire
 				auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
 				EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
-			}
 
-			// change state
-			m_State = EState::Evade;
-			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+				// change state
+				m_State = EState::Evade;
+				m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+			}
+			else
+			{
+				m_State = EState::Patrol;
+			}
 		}
 
 		// countdown

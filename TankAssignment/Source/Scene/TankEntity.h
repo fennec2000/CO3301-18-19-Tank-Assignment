@@ -13,6 +13,8 @@ using namespace std;
 #include "CVector3.h"
 #include "Entity.h"
 
+enum class ETankTeamMembership { solo, teamMember, teamLeader };
+
 namespace gen
 {
 
@@ -189,6 +191,25 @@ public:
 		}
 	}
 
+	const string GetMembership()
+	{
+		switch (m_MemberState)
+		{
+		case ETankTeamMembership::teamLeader:
+			return "Team Leader";
+			break;
+		case ETankTeamMembership::teamMember:
+			return "Team Member";
+			break;
+		case ETankTeamMembership::solo:
+			return "Solo";
+			break;
+		default:
+			return "";
+			break;
+		}
+	}
+
 	/////////////////////////////////////
 	// Update
 
@@ -230,10 +251,13 @@ private:
 	TFloat32 m_TurretSpeed;		// turn rate of the turret per frame
 	TFloat32 m_Countdown;		// delay for tank between actions
 	TFloat32 m_TurnSpeed;		// tank turn speed
+	TEntityUID m_UID;			// tank uid
 
 	// Tank state
 	EState   m_State; // Current state
 	TFloat32 m_Timer; // A timer used in the example update function   
+	ETankTeamMembership m_MemberState; // current team membership
+	int m_TeamMemberNumber;	// number in team
 
 	// waypointing
 	TInt32 m_Waypoint;				// current target waypoint

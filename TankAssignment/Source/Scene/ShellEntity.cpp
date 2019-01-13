@@ -47,6 +47,7 @@ CShellEntity::CShellEntity
 ) : CEntity( entityTemplate, UID, name, position, rotation, scale )
 {
 	// Initialise any shell data you add
+	m_UID = UID;
 	m_Speed = 50.0f;
 	m_Life = 3.0f;
 }
@@ -72,7 +73,7 @@ bool CShellEntity::Update( TFloat32 updateTime )
 			{
 				SMessage msg;
 				msg.type = EMessageType::Msg_TankHit;
-				msg.from = SystemUID;
+				msg.from = m_UID;
 				Messenger.SendMessage(tankUID, msg);
 				return false;
 			}

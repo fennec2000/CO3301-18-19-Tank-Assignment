@@ -72,6 +72,7 @@ private:
 	// Data
 
 	// Add your shell data here
+	TEntityUID m_UID;	// bullet UID
 	TFloat32 m_Speed;	// speed of the bullet
 	TFloat32 m_Life;	// the time the bullet is alive for
 };

@@ -25,6 +25,7 @@ namespace gen
 typedef TUInt32 TEntityUID;
 const TEntityUID SystemUID = 0xffffffff;
 const TEntityUID TextSystemUID = 0xfffffffe;
+const TEntityUID TeamManagerUID = 0xfffffffd;
 
 
 /*-----------------------------------------------------------------------------------------
