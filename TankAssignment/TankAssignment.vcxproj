@@ -137,6 +137,7 @@
     <ClCompile Include="Source\Render\Mesh.cpp" />
     <ClCompile Include="Source\Render\RenderMethod.cpp" />
     <ClCompile Include="Source\Render\CImportXFile.cpp" />
+    <ClCompile Include="Source\Scene\Powerup.cpp" />
     <ClCompile Include="Source\Scene\ShellEntity.cpp" />
     <ClCompile Include="Source\Scene\TankEntity.cpp" />
     <ClCompile Include="Source\Scene\TeamManager.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Source\Render\RenderMethod.h" />
     <ClInclude Include="Source\Render\CImportXFile.h" />
     <ClInclude Include="Source\Render\MeshData.h" />
+    <ClInclude Include="Source\Scene\Powerup.h" />
     <ClInclude Include="Source\Scene\ShellEntity.h" />
     <ClInclude Include="Source\Scene\TankEntity.h" />
     <ClInclude Include="Source\Scene\TeamManager.h" />

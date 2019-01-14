@@ -112,6 +112,7 @@ CTankEntity::CTankEntity
 	m_Target = 0;
 	m_MemberState = ETankTeamMembership::solo;
 	m_TeamMemberNumber = TeamManager.AddTank(UID, m_Team);
+	m_Ammo = m_TankTemplate->GetShellAmmo();
 	
 }
 
@@ -158,6 +159,26 @@ pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 up
 	return result;
 }
 
+void CTankEntity::FindAmmo()
+{
+	vector<TEntityUID> list = EntityManager.GetListOfUID("Ammo Cube");
+	TEntityUID closest;
+	TFloat32 closestDistance = INFINITY, distance;
+	CEntity* entity;
+	for each (TEntityUID uid in list)
+	{
+		entity = EntityManager.GetEntity(uid);
+		distance = Distance(entity->Position(), Position());
+		if (distance < closestDistance)
+		{
+			closest = uid;
+			closestDistance = distance;
+		}
+	}
+	m_Target = closest;
+	m_TargetPosition = EntityManager.GetEntity(m_Target)->Position();
+	m_State = EState::GettingAmmo;
+}
 
 // Update the tank - controls its behaviour. The shell code just performs some test behaviour, it
 // is to be rewritten as one of the assignment requirements
@@ -239,6 +260,15 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			m_State = EState::Evade;
 			m_TargetPosition = hurtTank->Position() - normalVectorToTarget * teamMemberSpace;
 		}
+
+		else if (msg.type == EMessageType::Msg_GiveAmmo)
+		{
+			// get 10% ammo
+			auto maxAmmo = m_TankTemplate->GetShellAmmo();
+			m_Ammo += maxAmmo * 0.1f;
+			if (m_Ammo > maxAmmo) // cap at max
+				m_Ammo = maxAmmo;
+		}
 	}
 
 
@@ -300,7 +330,10 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		auto enemy = EntityManager.GetEntity(m_Target);
 		if (enemy == nullptr) // enemy dies
 		{
-			m_State = EState::Patrol;
+			if (m_Ammo <= 0)
+				FindAmmo();
+			else
+				m_State = EState::Patrol;
 		}
 		auto targetVector = enemy->Position() - Position();
 		auto turret = Matrix(2) * Matrix();
@@ -322,6 +355,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 				// fire
 				auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
 				EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
+				--m_Ammo;
 
 				// change state
 				m_State = EState::Evade;
@@ -329,7 +363,10 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			}
 			else
 			{
-				m_State = EState::Patrol;
+				if (m_Ammo <= 0)
+					FindAmmo();
+				else
+					m_State = EState::Patrol;
 			}
 		}
 
@@ -367,9 +404,19 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		m_Speed = speedAndTurn.first;
 		m_TurnSpeed = speedAndTurn.second;
 	}
+	else if (m_State == EState::GettingAmmo)
+	{
+		//if target is null get another
+		if(EntityManager.GetEntity(m_Target) == nullptr)
+			FindAmmo();
+
+		// goto target
+		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+		m_Speed = speedAndTurn.first;
+		m_TurnSpeed = speedAndTurn.second;
+	}
 	else	// EState::Inactive and catches unknown states
 	{
-
 	}
 
 	// Perform movement...

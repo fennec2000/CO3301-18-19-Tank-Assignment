@@ -55,11 +55,12 @@ CEntityTemplate* CEntityManager::CreateTemplate( const string& type, const strin
 CTankTemplate* CEntityManager::CreateTankTemplate(const string& type, const string& name,
 	const string& mesh, float maxSpeed,
 	float acceleration, float turnSpeed,
-	float turretTurnSpeed, int maxHP, int shellDamage)
+	float turretTurnSpeed, int maxHP, int shellDamage,
+	float shellAmmo)
 {
 	// Create new tank template
 	CTankTemplate* newTemplate = new CTankTemplate(type, name, mesh, maxSpeed, acceleration,
-		turnSpeed, turretTurnSpeed, maxHP, shellDamage);
+		turnSpeed, turretTurnSpeed, maxHP, shellDamage, shellAmmo);
 
 	// Add the template name / template pointer pair to the map
 	m_Templates[name] = newTemplate;
@@ -183,6 +184,37 @@ TEntityUID CEntityManager::CreateShell
 
 	// Create new tank entity with next UID
 	CEntity* newEntity = new CShellEntity(entityTemplate, m_NextUID,
+		name, position, rotation, scale);
+
+	// Get vector index for new entity and add it to vector
+	TUInt32 entityIndex = static_cast<int>(m_Entities.size());
+	m_Entities.push_back(newEntity);
+
+	// Add mapping from UID to entity index into hash map
+	m_EntityUIDMap->SetKeyValue(m_NextUID, entityIndex);
+
+	m_IsEnumerating = false; // Cancel any entity enumeration (entity list has changed)
+
+							 // Return UID of new entity then increase it ready for next entity
+	return m_NextUID++;
+}
+
+// Create a shell, requires a shell template name, may supply entity name and position
+// Returns the UID of the new entity
+TEntityUID CEntityManager::CreatePowerup
+(
+	const string&   templateName,
+	const string&   name /*= ""*/,
+	const CVector3& position /*= CVector3::kOrigin*/,
+	const CVector3& rotation /*= CVector3( 0.0f, 0.0f, 0.0f )*/,
+	const CVector3& scale /*= CVector3( 1.0f, 1.0f, 1.0f )*/
+)
+{
+	// Get template associated with the template name
+	CEntityTemplate* entityTemplate = GetTemplate(templateName);
+
+	// Create new tank entity with next UID
+	CEntity* newEntity = new CPowerupEntity(entityTemplate, m_NextUID,
 		name, position, rotation, scale);
 
 	// Get vector index for new entity and add it to vector

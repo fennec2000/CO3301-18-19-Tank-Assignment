@@ -38,7 +38,7 @@ public:
 		const string& type, const string& name, const string& meshFilename,
 		TFloat32 maxSpeed, TFloat32 acceleration, TFloat32 turnSpeed,
 		TFloat32 turretTurnSpeed, TUInt32 maxHP, TUInt32 shellDamage, 
-		TFloat32 deceleration = 0.8f
+		TFloat32 shellAmmo, TFloat32 deceleration = 0.8f
 	) : CEntityTemplate( type, name, meshFilename )
 	{
 		// Set tank template values
@@ -49,6 +49,7 @@ public:
 		m_MaxHP = maxHP;
 		m_ShellDamage = shellDamage;
 		m_Deceleration = deceleration;
+		m_ShellAmmo = shellAmmo;
 	}
 
 	// No destructor needed (base class one will do)
@@ -91,6 +92,11 @@ public:
 		return m_ShellDamage;
 	}
 
+	TFloat32 GetShellAmmo()
+	{
+		return m_ShellAmmo;
+	}
+
 	TFloat32 GetDeceleration()
 	{
 		return m_Deceleration;
@@ -106,6 +112,7 @@ private:
 	TFloat32 m_Acceleration;    // Acceleration  -"-
 	TFloat32 m_TurnSpeed;       // Turn speed    -"-
 	TFloat32 m_TurretTurnSpeed; // Turret turn speed    -"-
+	TFloat32 m_ShellAmmo;       // ammo
 	TFloat32 m_Deceleration;
 
 	TUInt32  m_MaxHP;           // Maximum (initial) HP for this kind of tank
@@ -210,6 +217,11 @@ public:
 		}
 	}
 
+	const TFloat32 GetAmmo()
+	{
+		return m_Ammo;
+	}
+
 	/////////////////////////////////////
 	// Update
 
@@ -217,13 +229,15 @@ public:
 	// Return false if the entity is to be destroyed
 	// Keep as a virtual function in case of further derivation
 	virtual bool Update( TFloat32 updateTime );
-
-	pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime);	// function off turning and acceleration to tanks
 	
 
 /////////////////////////////////////
 //	Private interface
 private:
+
+	void FindAmmo();	// Sets the target and gets its possition for nearest ammo cube
+
+	pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime);	// function off turning and acceleration to tanks
 
 	/////////////////////////////////////
 	// Types
@@ -234,7 +248,8 @@ private:
 		Inactive,
 		Patrol,
 		Aim,
-		Evade
+		Evade,
+		GettingAmmo
 	};
 
 
@@ -252,6 +267,7 @@ private:
 	TFloat32 m_Countdown;		// delay for tank between actions
 	TFloat32 m_TurnSpeed;		// tank turn speed
 	TEntityUID m_UID;			// tank uid
+	TFloat32 m_Ammo;			// current ammo
 
 	// Tank state
 	EState   m_State; // Current state

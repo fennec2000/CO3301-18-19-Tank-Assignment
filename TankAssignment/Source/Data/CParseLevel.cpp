@@ -131,7 +131,8 @@ void CParseLevel::TemplatesStartElt( const string& eltName, SAttribute* attrs )
 		{
 			m_EntityManager->CreateTankTemplate(m_TemplateType, m_TemplateName, m_TemplateMesh,
 				GetAttributeFloat(attrs, "MaxSpeed"), GetAttributeFloat(attrs, "Acceleration"), GetAttributeFloat(attrs, "TurnSpeed"),
-				GetAttributeFloat(attrs, "TurretTurnSpeed"), GetAttributeFloat(attrs, "MaxHP"), GetAttributeFloat(attrs, "ShellDamage"));
+				GetAttributeFloat(attrs, "TurretTurnSpeed"), GetAttributeFloat(attrs, "MaxHP"), GetAttributeFloat(attrs, "ShellDamage"),
+				GetAttributeFloat(attrs, "ShellAmmo"));
 			m_TankNames.push_back(m_TemplateName);
 		}
 		else
@@ -223,11 +224,11 @@ void CParseLevel::EntitiesStartElt( const string& eltName, SAttribute* attrs )
 		}
 	}
 
-	// Component to add to entity
-	else if (eltName == "Component")
-	{
-		ComponentsStartElt( GetAttribute( attrs, "Type" ), attrs );
-	}
+	//// Component to add to entity
+	//else if (eltName == "Component")
+	//{
+	//	ComponentsStartElt( GetAttribute( attrs, "Type" ), attrs );
+	//}
 }
 
 // Called when the parser meets the end of an element (closing tag) in the entities section
@@ -246,6 +247,10 @@ void CParseLevel::EntitiesEndElt( const string& eltName )
 			if (result != end(m_TankNames))
 			{
 				entityUID = m_EntityManager->CreateTank(m_EntityType, m_TankTeam, m_EntityName);
+			}
+			else if (m_EntityType == "Ammo Cube")
+			{
+				entityUID = m_EntityManager->CreatePowerup(m_EntityType, m_EntityName);
 			}
 			else
 				entityUID = m_EntityManager->CreateEntity(m_EntityType, m_EntityName);

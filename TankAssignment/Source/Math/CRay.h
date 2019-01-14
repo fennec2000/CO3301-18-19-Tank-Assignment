@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////
-//  CParseLevel.cpp
+//  CRay.h
 //  A class to cast rays and if the tanks hit each other
 //  or the building
 //  Created on:      03-01-2019 13:40:00

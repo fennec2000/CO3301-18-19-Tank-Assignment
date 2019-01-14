@@ -16,6 +16,7 @@ using namespace std;
 #include "TankEntity.h"
 #include "ShellEntity.h"
 #include "Camera.h"
+#include "Powerup.h"
 
 namespace gen
 {
@@ -56,7 +57,8 @@ public:
 	CTankTemplate* CEntityManager::CreateTankTemplate( const string& type, const string& name,
 	                                                   const string& mesh, float maxSpeed,
 	                                                   float acceleration, float turnSpeed,
-	                                                   float turretTurnSpeed, int maxHP, int shellDamage );
+	                                                   float turretTurnSpeed, int maxHP, int shellDamage,
+	                                                   float shellAmmo);
 
 
 	// Destroy the given template (name) - returns true if the template existed and was destroyed
@@ -95,6 +97,17 @@ public:
 	// Create a shell, requires a shell template name, may supply entity name and position
 	// Returns the UID of the new entity
 	TEntityUID CreateShell
+	(
+		const string&   templateName,
+		const string&   name = "",
+		const CVector3& position = CVector3::kOrigin,
+		const CVector3& rotation = CVector3(0.0f, 0.0f, 0.0f),
+		const CVector3& scale = CVector3(1.0f, 1.0f, 1.0f)
+	);
+
+	// Create a powerup, requires a powerup template name, may supply entity name and position
+	// Returns the UID of the new entity
+	TEntityUID CreatePowerup
 	(
 		const string&   templateName,
 		const string&   name = "",
@@ -233,6 +246,24 @@ public:
 		
 		m_IsEnumerating = false;
 		return 0;
+	}
+
+	vector<TEntityUID> GetListOfUID(const string& name, const string& templateName = "",
+		const string& templateType = "")
+	{
+		vector<TEntityUID> result;
+		TEntityIter entity = m_Entities.begin();
+		while (entity != m_Entities.end())
+		{
+			if ((*entity)->GetName() == name &&
+				(templateName.length() == 0 || (*entity)->Template()->GetName() == templateName) &&
+				(templateType.length() == 0 || (*entity)->Template()->GetType() == templateType))
+			{
+				result.push_back((*entity)->GetUID());
+			}
+			++entity;
+		}
+		return result;
 	}
 
 

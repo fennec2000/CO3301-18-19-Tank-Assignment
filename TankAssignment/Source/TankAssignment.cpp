@@ -136,16 +136,6 @@ bool SceneSetup()
 	// Ambient light level
 	AmbientLight = SColourRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
-	//// team waypoints
-	//const vector<CVector3> listAWaypoints = { CVector3(-30.0f, 0.5f, -20.0f),	CVector3(-30.0f, 0.5f, 20.0f),
-	//								CVector3(-50.0f, 0.5f, 0.0f),	CVector3(-70.0f, 0.5f, 20.0f), 
-	//								CVector3(-70.0f, 0.5f, -20.0f),	CVector3(-50.0f, 0.5f, 0.0f) };
-	//const vector<CVector3> listBWaypoints = { CVector3(30.0f, 0.5f, -20.0f),	CVector3(30.0f, 0.5f, 20.0f),
-	//								CVector3(50.0f, 0.5f, 0.0f),	CVector3(70.0f, 0.5f, 20.0f),
-	//								CVector3(70.0f, 0.5f, -20.0f),	CVector3(50.0f, 0.5f, 0.0f) };
-	//TeamWaypoints.push_back(listAWaypoints);
-	//TeamWaypoints.push_back(listBWaypoints);
-
 	return true;
 }
 
@@ -295,6 +285,7 @@ void RenderSceneText( float updateTime )
 				outText << tank->GetHp() << '/' << tank->GetMaxHp() << '\n';
 				outText << "State: " << tank->GetState() << '\n';
 				outText << "Member: " << tank->GetMembership() << '\n';
+				outText << "Ammo: " << tank->GetAmmo() << '\n';
 			}
 			if (currentlySelectedTank == tankUID)
 			{
