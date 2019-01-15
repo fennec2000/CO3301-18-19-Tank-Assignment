@@ -88,6 +88,20 @@ public:
 	{
 		return m_MatViewProj;
 	}
+	D3DXMATRIX GetViewD3DXMatrix()
+	{
+		return D3DXMATRIX(	m_MatView.e00, m_MatView.e01, m_MatView.e02, m_MatView.e03,
+							m_MatView.e10, m_MatView.e11, m_MatView.e12, m_MatView.e13,
+							m_MatView.e20, m_MatView.e21, m_MatView.e22, m_MatView.e23,
+							m_MatView.e30, m_MatView.e31, m_MatView.e32, m_MatView.e33);
+	}
+	D3DXMATRIX GetViewProjectionD3DXMatrix()
+	{
+		return D3DXMATRIX(	m_MatViewProj.e00, m_MatViewProj.e01, m_MatViewProj.e02, m_MatViewProj.e03,
+							m_MatViewProj.e10, m_MatViewProj.e11, m_MatViewProj.e12, m_MatViewProj.e13,
+							m_MatViewProj.e20, m_MatViewProj.e21, m_MatViewProj.e22, m_MatViewProj.e23,
+							m_MatViewProj.e30, m_MatViewProj.e31, m_MatViewProj.e32, m_MatViewProj.e33);
+	}
 
 
 	/////////////////////////////

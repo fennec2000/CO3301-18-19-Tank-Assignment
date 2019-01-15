@@ -62,6 +62,8 @@ public:
 	// Return false if the entity is to be destroyed
 	// Keep as a virtual function in case of further derivation
 	virtual bool Update( TFloat32 updateTime );
+
+	void BulletOwner(TEntityUID tank);
 	
 
 /////////////////////////////////////

@@ -119,6 +119,12 @@
     <ClCompile Include="Source\Scene\Powerup.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Render\CParticalSystem.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scene\Camera.h">
@@ -229,6 +235,12 @@
     </ClInclude>
     <ClInclude Include="Source\Scene\Powerup.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Render\CParticalSystem.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Render\Shader.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

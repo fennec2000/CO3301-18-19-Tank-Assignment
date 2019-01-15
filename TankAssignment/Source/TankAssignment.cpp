@@ -21,6 +21,7 @@ using namespace std;
 #include "CParseLevel.h"
 #include "CRay.h"
 #include "TeamManager.h"
+#include "CParticalSystem.h"
 
 namespace gen
 {
@@ -75,6 +76,9 @@ CParseLevel LevelParser(&EntityManager, &TeamManager);
 // ray
 CRay Ray(&EntityManager);
 
+// partical system
+//CParticalSystem ParticalSystem;
+
 // Tank waypoints - list of lists of CVectro3 variable(team)(wapoint)
 vector<vector<CVector3>> TeamWaypoints;
 
@@ -120,6 +124,7 @@ bool SceneSetup()
 	const int teams = TeamManager.GetNumberOfTeams();
 	for(int i = 0; i < teams; ++i)
 		TeamManager.UpdateMembership(i);
+	//ParticalSystem.Setup();
 
 
 	/////////////////////////////
@@ -219,6 +224,7 @@ void RenderScene( float updateTime )
 	// Render entities and draw on-screen text
 	EntityManager.RenderAllEntities();
 	RenderSceneText( updateTime );
+	//ParticalSystem.Render();
 
     // Present the backbuffer contents to the display
 	SwapChain->Present( 0, 0 );
@@ -329,6 +335,7 @@ void UpdateScene( float updateTime )
 {
 	// Call all entity update functions
 	EntityManager.UpdateAllEntities( updateTime );
+	//ParticalSystem.Update(updateTime);
 
 	// Picker
 	if (KeyHit(EKeyCode::Mouse_LButton))
@@ -466,6 +473,9 @@ void UpdateScene( float updateTime )
 	{
 		chaseCam = !chaseCam;
 	}
+
+	//if (KeyHit(Key_F4))
+		//ParticalSystem.ResetParticles();
 
 	// Update chase cam
 	if (chaseCam)

@@ -222,6 +222,11 @@ public:
 		return m_Ammo;
 	}
 
+	const TFloat32 GetShellDamage()
+	{
+		return m_TankTemplate->GetShellDamage();
+	}
+
 	/////////////////////////////////////
 	// Update
 
@@ -249,7 +254,8 @@ private:
 		Patrol,
 		Aim,
 		Evade,
-		GettingAmmo
+		GettingAmmo,
+		Dying
 	};
 
 
@@ -281,6 +287,9 @@ private:
 
 	// targeting
 	TEntityUID m_Target;		// current target
+
+	// death
+	CVector3 m_DeathVec;		// force vector on death
 };
 
 

@@ -46,6 +46,8 @@ namespace gen
 	const TFloat32 turretAimSpeedMultiplyer = 3.0f;
 	const TFloat32 minRotation = 0.001f;
 	const TFloat32 barrelLenght = 4.0f;
+	const TFloat32 tankGravity = 5.0f;
+	const TFloat32 deathForce = 10.0f;
 
 	// random
 	std::default_random_engine generator;
@@ -113,7 +115,7 @@ CTankEntity::CTankEntity
 	m_MemberState = ETankTeamMembership::solo;
 	m_TeamMemberNumber = TeamManager.AddTank(UID, m_Team);
 	m_Ammo = m_TankTemplate->GetShellAmmo();
-	
+	m_DeathVec = { Random(-deathForce, deathForce), deathForce, Random(deathForce, deathForce) };
 }
 
 pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime)
@@ -185,252 +187,276 @@ void CTankEntity::FindAmmo()
 // Return false if the entity is to be destroyed
 bool CTankEntity::Update( TFloat32 updateTime )
 {
-	// Fetch any messages
-	SMessage msg;
-	while (Messenger.FetchMessage( GetUID(), &msg ))
+	if (m_State == EState::Dying)
 	{
-		// Set state variables based on received messages
-		if (msg.type == EMessageType::Msg_TankStart)
-		{
-			m_State = EState::Patrol;
-			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
-			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
-		}
-		else if (msg.type == EMessageType::Msg_TankStop)
-		{
-			m_State = EState::Inactive;
-			m_Speed = 0;
-			m_TurretSpeed = 0;
-		}
-		else if (msg.type == EMessageType::Msg_TankAim)
-		{
-			m_State = EState::Aim;
-			m_Speed = 0;
-			m_Countdown = 1.0f;
-			m_TurretSpeed = 0;
-		}
-		else if (msg.type == EMessageType::Msg_TankHit)
-		{
-			m_HP -= 20;
-			if (m_HP <= 0)
-			{
-				TeamManager.UpdateMembership(m_Team);
-				return false;
-			}
-
-			// request help
-			SMessage msg;
-			msg.type = EMessageType::Msg_TankHelp;
-			msg.from = m_UID;
-			const int teamSize = TeamManager.GetTeamSize(m_Team);
-			for (int j = 0; j < teamSize; ++j)
-			{
-				const auto tankUID = TeamManager.GetTankUID(m_Team, j);
-				if (tankUID == m_UID)
-					continue;
-				Messenger.SendMessage(tankUID, msg);
-			}
-		}
-		else if (msg.type == EMessageType::Msg_TankEvade)
-		{
-			m_State = EState::Evade;
-			m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
-		}
-		else if (msg.type == EMessageType::Msg_TankGoto)
-		{
-			m_State = EState::Evade;
-			m_TargetPosition = MouseTarget3DPos + CVector3(0, 0.5f, 0);
-		}
-		else if (msg.type == EMessageType::Msg_TankBecomeTeamLeader)
-		{
-			m_MemberState = ETankTeamMembership::teamLeader;
-			m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
-		}
-
-		else if (msg.type == EMessageType::Msg_TankBecomeTeamMember)
-		{
-			m_MemberState = ETankTeamMembership::teamMember;
-			m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
-		}
-
-		else if (msg.type == EMessageType::Msg_TankHelp)
-		{
-			auto hurtTank = EntityManager.GetEntity(msg.from);
-			auto normalVectorToTarget = Normalise(hurtTank->Position() - Position());
-			m_State = EState::Evade;
-			m_TargetPosition = hurtTank->Position() - normalVectorToTarget * teamMemberSpace;
-		}
-
-		else if (msg.type == EMessageType::Msg_GiveAmmo)
-		{
-			// get 10% ammo
-			auto maxAmmo = m_TankTemplate->GetShellAmmo();
-			m_Ammo += maxAmmo * 0.1f;
-			if (m_Ammo > maxAmmo) // cap at max
-				m_Ammo = maxAmmo;
-		}
+		Matrix(2).Move(m_DeathVec * updateTime);
+		Matrix(2).RotateLocalX(m_DeathVec.x * updateTime);
+		Matrix(2).RotateLocalY(m_DeathVec.y * updateTime);
+		Matrix(2).RotateLocalZ(m_DeathVec.z * updateTime);
+		m_DeathVec.y -= updateTime * tankGravity;
+		if (m_DeathVec.y < -deathForce)
+			return false;
 	}
-
-
-	// Tank behaviour
-	// Only move if in Go state
-	if (m_State == EState::Patrol)
+	else
 	{
-		if (m_MemberState == ETankTeamMembership::teamMember)
-			m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
-
-		// check if at waypoint
-		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
+		// Fetch any messages
+		SMessage msg;
+		while (Messenger.FetchMessage(GetUID(), &msg) && m_State != EState::Dying)
 		{
-			// next waypoint and face target
-			++m_Waypoint;
-			if (m_Waypoint >= GetMaxWaypoints(m_Team))
-				m_Waypoint = 0;
-			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
-		}
-
-		// target in range
-		const int NumOfTeams = TeamManager.GetNumberOfTeams();
-		for (int i = 0; i < NumOfTeams; ++i)
-		{
-			if (i == m_Team)	// skip own team
-				continue;
-
-			const int teamSize = TeamManager.GetTeamSize(i);
-			for (int j = 0; j < teamSize; ++j)
+			// Set state variables based on received messages
+			if (msg.type == EMessageType::Msg_TankStart)
 			{
-				const auto enemyUID = TeamManager.GetTankUID(i, j);
-				auto enemy = EntityManager.GetEntity(enemyUID);
-				if (enemy != nullptr)
-				{
-					const auto targetVector = enemy->Position() - Position();
-					auto turret = Matrix(2) * Matrix();
-					const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+				m_State = EState::Patrol;
+				m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
+				m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
+			}
+			else if (msg.type == EMessageType::Msg_TankStop)
+			{
+				m_State = EState::Inactive;
+				m_Speed = 0;
+				m_TurretSpeed = 0;
+			}
+			else if (msg.type == EMessageType::Msg_TankAim)
+			{
+				m_State = EState::Aim;
+				m_Speed = 0;
+				m_Countdown = 1.0f;
+				m_TurretSpeed = 0;
+			}
+			else if (msg.type == EMessageType::Msg_TankHit)
+			{
+				auto entity = EntityManager.GetEntity(msg.from);
+				auto tank = dynamic_cast<CTankEntity*>(entity);
+				if (tank != nullptr)
+					m_HP -= tank->GetShellDamage();
+				else
+					m_HP -= 20;
 
-					if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
-					{
-						m_State = EState::Aim;
-						m_TurretSpeed = 0;
-						m_Speed = 0;
-						m_TurnSpeed = 0;
-						m_Countdown = 1.0f;
-						m_Target = enemyUID;
-					}
+				if (m_HP <= 0)
+				{
+					m_HP = 0;
+					TeamManager.UpdateMembership(m_Team);
+					m_State = EState::Dying;
+				}
+
+				// request help
+				SMessage msg;
+				msg.type = EMessageType::Msg_TankHelp;
+				msg.from = m_UID;
+				const int teamSize = TeamManager.GetTeamSize(m_Team);
+				for (int j = 0; j < teamSize; ++j)
+				{
+					const auto tankUID = TeamManager.GetTankUID(m_Team, j);
+					if (tankUID == m_UID)
+						continue;
+					Messenger.SendMessage(tankUID, msg);
 				}
 			}
-		}
-
-		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
-		m_Speed = speedAndTurn.first;
-		m_TurnSpeed = speedAndTurn.second;
-	}
-	else if (m_State == EState::Aim)
-	{
-		// aim
-		auto enemy = EntityManager.GetEntity(m_Target);
-		if (enemy == nullptr) // enemy dies
-		{
-			if (m_Ammo <= 0)
-				FindAmmo();
-			else
-				m_State = EState::Patrol;
-		}
-		auto targetVector = enemy->Position() - Position();
-		auto turret = Matrix(2) * Matrix();
-		auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
-		bool toRight = (Dot(targetVector, turret.XAxis()) > 0) ? true : false;
-		TFloat32 acosRot = acos(rotationToTarget);
-		if (acosRot > minRotation)
-		{
-			if (toRight)
-				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
-			else
-				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
-		}
-
-		if (m_Countdown <= 0)
-		{
-			if (!Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+			else if (msg.type == EMessageType::Msg_TankEvade)
 			{
-				// fire
-				auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
-				EntityManager.GetEntity(bulletUID)->Matrix().FaceDirection(turret.ZAxis());
-				--m_Ammo;
-
-				// change state
 				m_State = EState::Evade;
 				m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
 			}
-			else
+			else if (msg.type == EMessageType::Msg_TankGoto)
+			{
+				m_State = EState::Evade;
+				m_TargetPosition = MouseTarget3DPos + CVector3(0, 0.5f, 0);
+			}
+			else if (msg.type == EMessageType::Msg_TankBecomeTeamLeader)
+			{
+				m_MemberState = ETankTeamMembership::teamLeader;
+				m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
+			}
+
+			else if (msg.type == EMessageType::Msg_TankBecomeTeamMember)
+			{
+				m_MemberState = ETankTeamMembership::teamMember;
+				m_TeamMemberNumber = TeamManager.GetTankMemberNumber(m_Team, m_UID);
+			}
+
+			else if (msg.type == EMessageType::Msg_TankHelp)
+			{
+				auto hurtTank = EntityManager.GetEntity(msg.from);
+				auto normalVectorToTarget = Normalise(hurtTank->Position() - Position());
+				m_State = EState::Evade;
+				m_TargetPosition = hurtTank->Position() - normalVectorToTarget * teamMemberSpace;
+			}
+
+			else if (msg.type == EMessageType::Msg_GiveAmmo)
+			{
+				// get 10% ammo
+				auto maxAmmo = m_TankTemplate->GetShellAmmo();
+				m_Ammo += maxAmmo * 0.1f;
+				if (m_Ammo > maxAmmo) // cap at max
+					m_Ammo = maxAmmo;
+			}
+		}
+
+
+		// Tank behaviour
+		// Only move if in Go state
+		if (m_State == EState::Patrol)
+		{
+			if (m_MemberState == ETankTeamMembership::teamMember)
+				m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
+
+			// check if at waypoint
+			if (Distance(m_TargetPosition, Position()) <= waypointRadious)
+			{
+				// next waypoint and face target
+				++m_Waypoint;
+				if (m_Waypoint >= GetMaxWaypoints(m_Team))
+					m_Waypoint = 0;
+				m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
+			}
+
+			// target in range
+			const int NumOfTeams = TeamManager.GetNumberOfTeams();
+			for (int i = 0; i < NumOfTeams; ++i)
+			{
+				if (i == m_Team)	// skip own team
+					continue;
+
+				const int teamSize = TeamManager.GetTeamSize(i);
+				for (int j = 0; j < teamSize; ++j)
+				{
+					const auto enemyUID = TeamManager.GetTankUID(i, j);
+					auto enemy = EntityManager.GetEntity(enemyUID);
+					if (enemy != nullptr)
+					{
+						const auto targetVector = enemy->Position() - Position();
+						auto turret = Matrix(2) * Matrix();
+						const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+
+						if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+						{
+							m_State = EState::Aim;
+							m_TurretSpeed = 0;
+							m_Speed = 0;
+							m_TurnSpeed = 0;
+							m_Countdown = 1.0f;
+							m_Target = enemyUID;
+						}
+					}
+				}
+			}
+
+			const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+			m_Speed = speedAndTurn.first;
+			m_TurnSpeed = speedAndTurn.second;
+		}
+		else if (m_State == EState::Aim)
+		{
+			// aim
+			auto enemy = EntityManager.GetEntity(m_Target);
+			if (enemy == nullptr) // enemy dies
 			{
 				if (m_Ammo <= 0)
 					FindAmmo();
 				else
 					m_State = EState::Patrol;
 			}
-		}
+			auto targetVector = enemy->Position() - Position();
+			auto turret = Matrix(2) * Matrix();
+			auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+			bool toRight = (Dot(targetVector, turret.XAxis()) > 0) ? true : false;
+			TFloat32 acosRot = acos(rotationToTarget);
+			if (acosRot > minRotation)
+			{
+				if (toRight)
+					m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
+				else
+					m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
+			}
 
-		// countdown
-		else
-		{
-			m_Countdown -= updateTime;
 			if (m_Countdown <= 0)
-				m_Countdown = 0;
-		}
-	}
-	else if (m_State == EState::Evade)
-	{
-		// reset the turret
-		auto turret = Matrix(2) * Matrix();
-		const auto rotationToNeutral = Dot(Normalise(Matrix().ZAxis()), Normalise(turret.ZAxis()));
-		const bool toRight = (Dot(Matrix().ZAxis(), turret.XAxis()) > 0) ? true : false;
-		const TFloat32 acosRot = acos(rotationToNeutral);
-		if (acosRot > minRotation)
-		{
-			if (toRight)
-				m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
+			{
+				if (!Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+				{
+					// fire
+					auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
+					auto bullet = EntityManager.GetEntity(bulletUID);
+					bullet->Matrix().FaceDirection(turret.ZAxis());
+					auto shell = dynamic_cast<CShellEntity*>(bullet);
+					shell->BulletOwner(m_UID);
+					--m_Ammo;
+
+					// change state
+					m_State = EState::Evade;
+					m_TargetPosition = CVector3(distribution(generator), 0, distribution(generator)) + Position();
+				}
+				else
+				{
+					if (m_Ammo <= 0)
+						FindAmmo();
+					else
+						m_State = EState::Patrol;
+				}
+			}
+
+			// countdown
 			else
-				m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
+			{
+				m_Countdown -= updateTime;
+				if (m_Countdown <= 0)
+					m_Countdown = 0;
+			}
 		}
-
-		if (Distance(m_TargetPosition, Position()) <= waypointRadious)
+		else if (m_State == EState::Evade)
 		{
-			m_State = EState::Patrol;
-			m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
-			m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
+			// reset the turret
+			auto turret = Matrix(2) * Matrix();
+			const auto rotationToNeutral = Dot(Normalise(Matrix().ZAxis()), Normalise(turret.ZAxis()));
+			const bool toRight = (Dot(Matrix().ZAxis(), turret.XAxis()) > 0) ? true : false;
+			const TFloat32 acosRot = acos(rotationToNeutral);
+			if (acosRot > minRotation)
+			{
+				if (toRight)
+					m_TurretSpeed = Min(acosRot, m_TankTemplate->GetTurretTurnSpeed()) * turretAimSpeedMultiplyer;
+				else
+					m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
+			}
+
+			if (Distance(m_TargetPosition, Position()) <= waypointRadious)
+			{
+				m_State = EState::Patrol;
+				m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
+				m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
+			}
+
+			const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+			m_Speed = speedAndTurn.first;
+			m_TurnSpeed = speedAndTurn.second;
+		}
+		else if (m_State == EState::GettingAmmo)
+		{
+			//if target is null get another
+			if (EntityManager.GetEntity(m_Target) == nullptr)
+				FindAmmo();
+
+			// goto target
+			const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
+			m_Speed = speedAndTurn.first;
+			m_TurnSpeed = speedAndTurn.second;
+		}
+		else	// EState::Inactive and catches unknown states
+		{
 		}
 
-		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
-		m_Speed = speedAndTurn.first;
-		m_TurnSpeed = speedAndTurn.second;
+		// Perform movement...
+		// Move along local Z axis scaled by update time
+		Matrix().MoveLocalZ(m_Speed * updateTime);
+		Matrix().RotateLocalY(m_TurnSpeed * updateTime);
+
+		// turret
+		Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
+
+		// mgs to display text on screen
+		msg.type = EMessageType::Msg_DisplayEntityInfo;
+		msg.from = GetUID();
+		Messenger.SendMessage(TextSystemUID, msg);
 	}
-	else if (m_State == EState::GettingAmmo)
-	{
-		//if target is null get another
-		if(EntityManager.GetEntity(m_Target) == nullptr)
-			FindAmmo();
-
-		// goto target
-		const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
-		m_Speed = speedAndTurn.first;
-		m_TurnSpeed = speedAndTurn.second;
-	}
-	else	// EState::Inactive and catches unknown states
-	{
-	}
-
-	// Perform movement...
-	// Move along local Z axis scaled by update time
-	Matrix().MoveLocalZ( m_Speed * updateTime);
-	Matrix().RotateLocalY(m_TurnSpeed * updateTime);
-
-	// turret
-	Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
-
-	// mgs to display text on screen
-	msg.type = EMessageType::Msg_DisplayEntityInfo;
-	msg.from = GetUID();
-	Messenger.SendMessage(TextSystemUID, msg);
+	
 
 	return true; // Don't destroy the entity
 }

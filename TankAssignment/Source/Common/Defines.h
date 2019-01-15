@@ -10,6 +10,11 @@
 	Change history:
 		V1.0    Created 23/09/05 - LN
 **************************************************************************************************/
+#pragma once // Prevent file being included more than once (would cause errors)
+
+#include <Windows.h>
+#include <d3d10.h>  // Updated header files of course
+#include <d3dx10.h> // --"--
 
 #ifndef GEN_DEFINES_H_INCLUDED
 #define GEN_DEFINES_H_INCLUDED
@@ -97,6 +102,26 @@ const TUInt32 kiPreviousValue = 0x7ffffffd;
 inline const char* ClassName() { return ""; }
 inline const char* ObjectName() { return ""; }
 inline void SetObjectName( const char* ) {}
+
+//-----------------------------------------------------------------------------
+// Helper functions and macros
+//-----------------------------------------------------------------------------
+
+// Helper macro to release DirectX pointers only if they are not NULL
+#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p) = NULL; } }
+
+
+//-----------------------------------------------------------------------------
+// Global variables
+//-----------------------------------------------------------------------------
+
+// Make DirectX render device available to other source files. We declare this
+// variable global in one file, then make it "extern" to all others. In general
+// this is not good practice - this is a kind of super-global variable. Would
+// be better to have a Device class responsible for this data. However, this
+// example aims for a minimum of code to help demonstrate the focus topic
+extern ID3D10Device* g_pd3dDevice; // New type for DX10
+
 
 
 } // namespace gen

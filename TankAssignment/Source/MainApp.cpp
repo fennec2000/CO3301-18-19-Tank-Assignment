@@ -93,6 +93,7 @@ bool D3DSetup( HWND hWnd )
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	sd.OutputWindow = hWnd;                            // Target window
 	sd.Windowed = TRUE;                                // Whether to render in a window (TRUE) or go fullscreen (FALSE)
 	if (FAILED( D3D10CreateDeviceAndSwapChain( NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, 0, D3D10_SDK_VERSION, &sd, &SwapChain, &g_pd3dDevice ) )) return false;
@@ -123,8 +124,49 @@ bool D3DSetup( HWND hWnd )
 	descDepth.MiscFlags = 0;
 	if( FAILED( g_pd3dDevice->CreateTexture2D( &descDepth, NULL, &DepthStencil ) )) return false;
 
+	// Get the back buffer from the swap chain just created - treated as a 2D texture
+	if (FAILED(SwapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), (LPVOID*)&pBackBuffer))) { return false; }
+
+	// Create a "render target view" object from the back buffer
+	hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &BackBufferRenderTarget);
+	pBackBuffer->Release();
+	if (FAILED(hr)) { return false; }
+
 	// Create the depth stencil view, i.e. indicate that the texture just created is to be used as a depth buffer
-	if( FAILED( g_pd3dDevice->CreateDepthStencilView( DepthStencil, NULL, &DepthStencilView ) )) return false;
+	D3D10_DEPTH_STENCIL_VIEW_DESC descDSV;
+	descDSV.Format = descDepth.Format;
+	descDSV.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+	descDSV.Texture2D.MipSlice = 0;
+	if( FAILED( g_pd3dDevice->CreateDepthStencilView( DepthStencil, &descDSV, &DepthStencilView ) )) return false;
+
+	// Bind the back buffer and depth/stencil buffer views to the end of the rendering pipeline
+	g_pd3dDevice->OMSetRenderTargets(1, &BackBufferRenderTarget, DepthStencilView);
+
+	// Indentify the viewport (window) dimensions used in the "rasterisation stage"
+	D3D10_VIEWPORT vp;
+	vp.Width = ViewportWidth;
+	vp.Height = ViewportHeight;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	g_pd3dDevice->RSSetViewports(1, &vp);
+
+	// Set up tri-linear filtering (and texture wrapping) by defining "sampler state"
+	ID3D10SamplerState* samplerState;
+	D3D10_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR; // Tri-linear filtering equivalent
+	samplerDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;    // Wrap texture addressing mode
+	samplerDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;    // --"--
+	samplerDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;    // --"--
+	samplerDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;  // Allows a test on the value sampled from texture prior to use (new to DX10 - not using here)
+	samplerDesc.MinLOD = 0;                               // Set range of mip-maps to use, these values indicate...
+	samplerDesc.MaxLOD = D3D10_FLOAT32_MAX;               // ...to use all available mip-maps (i.e. enable mip-mapping)
+	g_pd3dDevice->CreateSamplerState(&samplerDesc, &samplerState);
+
+	// Set the sampler state into the pixel shader pipeline stage
+	g_pd3dDevice->PSSetSamplers(0, 1, &samplerState);
 
 	// Create a font using D3DX helper functions
     if (FAILED(D3DX10CreateFont( g_pd3dDevice, 12, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,

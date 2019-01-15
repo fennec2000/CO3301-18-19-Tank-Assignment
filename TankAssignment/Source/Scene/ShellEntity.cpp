@@ -47,7 +47,6 @@ CShellEntity::CShellEntity
 ) : CEntity( entityTemplate, UID, name, position, rotation, scale )
 {
 	// Initialise any shell data you add
-	m_UID = UID;
 	m_Speed = 50.0f;
 	m_Life = 3.0f;
 }
@@ -85,6 +84,11 @@ bool CShellEntity::Update( TFloat32 updateTime )
 	if (m_Life <= 0)
 		return false;
 	return true;
+}
+
+void CShellEntity::BulletOwner(TEntityUID tank)
+{
+	m_UID = tank;
 }
 
 
