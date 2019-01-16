@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{35B4805C-0DFE-46EC-B523-FDA4DB47BDA8}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>ParticleTool</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%expat%\Source\lib;Source\Common;Source\Data;Source\Math;Source\Scene;Source\Render;Source\UI;%(AdditionalIncludeDirectories);Graphics Code;Graphics Code\Import;Graphics Code\Import\Math;Graphics Code\Import\Common</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libexpat.lib;d3d10.lib;d3dx10.lib;d3dx9.lib;d3dxof.lib;dxguid.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>Main</EntryPointSymbol>
+      <AdditionalLibraryDirectories>%expat%\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "%expat%\Bin\libexpat.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%expat%\Source\lib;Source\Common;Source\Data;Source\Math;Source\Scene;Source\Render;Source\UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>libexpat.lib;d3d10.lib;d3dx10.lib;d3dx9.lib;d3dxof.lib;dxguid.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>Main</EntryPointSymbol>
+      <AdditionalLibraryDirectories>%expat%\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseLevel.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseXML.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\BaseMath.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix2x2.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix3x3.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix4x4.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuaternion.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuatTransform.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CRay.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector2.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector3.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector4.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathIO.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CImportXFile.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CParticalSystem.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Mesh.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\RenderMethod.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Shader.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Camera.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Entity.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\EntityManager.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Light.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Messenger.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Powerup.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\ShellEntity.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TankEntity.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TeamManager.cpp" />
+    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\UI\Input.cpp" />
+    <ClCompile Include="ParticleForm.cpp" />
+    <ClCompile Include="Source\Common\CFatalException.cpp" />
+    <ClCompile Include="Source\Common\CHashTable.cpp" />
+    <ClCompile Include="Source\Common\CTimer.cpp" />
+    <ClCompile Include="Source\Common\MSDefines.cpp" />
+    <ClCompile Include="Source\Common\Utility.cpp" />
+    <ClCompile Include="Source\MainApp.cpp" />
+    <ClCompile Include="Source\TankAssignment.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseLevel.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseXML.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\BaseMath.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix2x2.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix3x3.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix4x4.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuaternion.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuatTransform.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CRay.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector2.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector3.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector4.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathDX.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathIO.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CImportXFile.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Colour.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CParticalSystem.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Mesh.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\MeshData.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\RenderMethod.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Shader.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Camera.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Entity.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\EntityManager.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Light.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Messenger.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Powerup.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\ShellEntity.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TankEntity.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TeamManager.h" />
+    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\UI\Input.h" />
+    <ClInclude Include="ParticleForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="Source\Common\CFatalException.h" />
+    <ClInclude Include="Source\Common\CHashTable.h" />
+    <ClInclude Include="Source\Common\CTimer.h" />
+    <ClInclude Include="Source\Common\Defines.h" />
+    <ClInclude Include="Source\Common\Error.h" />
+    <ClInclude Include="Source\Common\MSDefines.h" />
+    <ClInclude Include="Source\Common\Utility.h" />
+    <ClInclude Include="Source\TankAssignment.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ParticleForm.resx">
+      <DependentUpon>ParticleForm.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Entities.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\TankAssignment.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -9,8 +9,8 @@
 #include <string>
 using namespace std;
 
-#include "Defines.h"
-#include "CVector3.h"
+#include "../Common/Defines.h"
+#include "../Math/CVector3.h"
 #include "Entity.h"
 
 enum class ETankTeamMembership { solo, teamMember, teamLeader };
@@ -240,7 +240,9 @@ public:
 //	Private interface
 private:
 
+	// repeate code functions
 	void FindAmmo();	// Sets the target and gets its possition for nearest ammo cube
+	void GetPatrolWaypoint();	// Get waypoint for patrol
 
 	pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 updateTime);	// function off turning and acceleration to tanks
 

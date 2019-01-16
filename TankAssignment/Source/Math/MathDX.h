@@ -24,7 +24,7 @@
 
 #include <d3dx9.h>
 
-#include "Defines.h"
+#include "../Common/Defines.h"
 
 namespace gen
 {

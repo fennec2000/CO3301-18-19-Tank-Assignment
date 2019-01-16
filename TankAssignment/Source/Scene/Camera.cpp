@@ -6,9 +6,9 @@
 ********************************************/
 
 #include <d3dx9.h>
-#include "MathDX.h"
+#include "../Math/MathDX.h"
 #include "Camera.h"
-#include "CVector4.h"
+#include "../Math/CVector4.h"
 
 namespace gen
 {

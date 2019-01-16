@@ -14,11 +14,11 @@
 #include <list>
 using namespace std;
 
-#include "Defines.h"
-#include "CVector3.h"
-#include "EntityManager.h"
+#include "../Common/Defines.h"
+#include "../Math/CVector3.h"
+#include "../Scene/EntityManager.h"
 #include "CParseXML.h"
-#include "TeamManager.h"
+#include "../Scene/TeamManager.h"
 
 namespace gen
 {
@@ -135,7 +135,7 @@ private:
 	CVector3 m_Scale;
 
 	// Current waypoint state (i.e. latest values read during parsing)
-	vector<CVector3> m_List;
+	vector<CVector3> m_List;		// list of positions to be pushed to extern TeamWaypoints
 	CVector3         m_WaypointPos;
 };
 

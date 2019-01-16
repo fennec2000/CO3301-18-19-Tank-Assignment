@@ -14,7 +14,7 @@
 #include <iostream>
 using namespace std;
 
-#include "Defines.h"
+#include "../Common/Defines.h"
 #include "CVector2.h"
 #include "CVector3.h"
 #include "CVector4.h"

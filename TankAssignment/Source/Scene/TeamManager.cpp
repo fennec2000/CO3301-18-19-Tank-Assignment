@@ -4,7 +4,6 @@ gen::CTeamManager::CTeamManager(CEntityManager* entityManager)
 {
 	m_EntityManager = entityManager;
 	m_NumOfTeams = 0;
-	m_TotalNumberOfTanks = 0;
 }
 
 gen::CTeamManager::~CTeamManager()
@@ -26,7 +25,6 @@ int gen::CTeamManager::AddTank(TEntityUID tankUID, int team)
 
 	// add tank
 	m_Teams.at(team).push_back(tankUID);
-	++m_TotalNumberOfTanks;
 	return m_TeamSizes[team]++;
 }
 
@@ -84,14 +82,17 @@ bool gen::CTeamManager::UpdateMembership(int team)
 	while (i < m_Teams.at(team).size())
 	{
 		auto uid = m_Teams.at(team).at(i);
+
+		// if dead
 		if (m_EntityManager->GetEntity(uid) == nullptr)
 		{
 			auto myteam = m_Teams.at(team);
 			m_Teams.at(team).erase(m_Teams.at(team).begin() + i);
 			--m_TeamSizes[team];
 		}
-		else
+		else // update
 		{
+			// update tank
 			SMessage msg;
 			msg.from = TeamManagerUID;
 			if (i == 0)
@@ -100,9 +101,7 @@ bool gen::CTeamManager::UpdateMembership(int team)
 				m_TeamLeaders[team] = uid;
 			}
 			else
-			{
 				msg.type = EMessageType::Msg_TankBecomeTeamMember;
-			}
 
 			Messenger.SendMessage(uid, msg);
 			++i;

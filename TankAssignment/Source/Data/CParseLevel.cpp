@@ -6,8 +6,8 @@
 //  Original author: LN
 ///////////////////////////////////////////////////////////
 
-#include "BaseMath.h"
-#include "Entity.h"
+#include "../Math/BaseMath.h"
+#include "../Scene/Entity.h"
 #include "CParseLevel.h"
 
 namespace gen

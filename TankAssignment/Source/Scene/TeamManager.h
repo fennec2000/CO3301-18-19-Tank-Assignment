@@ -18,25 +18,27 @@ enum class EFormation { line, square, surround };
 class CTeamManager
 {
 private:
-	CEntityManager* m_EntityManager;
-	int m_NumOfTeams;
-	vector<vector<TEntityUID>> m_Teams;
-	vector<int> m_TeamSizes;
-	vector<int> m_TeamLeaders;
-	int m_TotalNumberOfTanks;
-	vector<EFormation> m_TeamFormation;
+	CEntityManager* m_EntityManager;	// pointer to entity manger
+	int m_NumOfTeams;					// number of teams made
+	vector<vector<TEntityUID>> m_Teams;	// list of team and there members
+	vector<int> m_TeamSizes;			// list of team sizes
+	vector<int> m_TeamLeaders;			// list of team leaders
+	vector<EFormation> m_TeamFormation;	// teams current formation
 
 public:
+	// constructor / destructor
 	CTeamManager(CEntityManager* entityManager);
 	~CTeamManager();
-	int AddTank(TEntityUID tankUID, int team);
+
+	// Getters
 	inline int GetNumberOfTeams() noexcept { return m_NumOfTeams; }
 	int GetTeamSize(int team);
 	TEntityUID GetTankUID(int team, int memberNumber);
-	inline int GetTotalNumberOfTanks() noexcept { return m_TotalNumberOfTanks; }
 	int GetTankMemberNumber(int team, TEntityUID UID);
 	CVector3 GetTankPos(int team, int memberNumber);
-	bool UpdateMembership(int team);
+
+	int AddTank(TEntityUID tankUID, int team);	// adds a tank to a team
+	bool UpdateMembership(int team);			// checks team leader, re-asign team leader if ther is none and updates position in team
 };
 }
 

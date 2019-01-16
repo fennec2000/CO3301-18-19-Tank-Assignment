@@ -18,7 +18,7 @@
 
 #include "CMatrix4x4.h"
 
-#include "Error.h"
+#include "../Common/Error.h"
 #include "CVector4.h"
 #include "CMatrix2x2.h"
 #include "CMatrix3x3.h"

@@ -60,6 +60,7 @@ bool CShellEntity::Update( TFloat32 updateTime )
 	// movement
 	Matrix().MoveLocalZ(m_Speed * updateTime);
 
+	// hit detection
 	const int NumOfTeams = TeamManager.GetNumberOfTeams();
 	for (int i = 0; i < NumOfTeams; ++i)
 	{
@@ -72,7 +73,7 @@ bool CShellEntity::Update( TFloat32 updateTime )
 			{
 				SMessage msg;
 				msg.type = EMessageType::Msg_TankHit;
-				msg.from = m_UID;
+				msg.from = m_OwnerUID;
 				Messenger.SendMessage(tankUID, msg);
 				return false;
 			}
@@ -88,8 +89,6 @@ bool CShellEntity::Update( TFloat32 updateTime )
 
 void CShellEntity::BulletOwner(TEntityUID tank)
 {
-	m_UID = tank;
+	m_OwnerUID = tank;
 }
-
-
 } // namespace gen

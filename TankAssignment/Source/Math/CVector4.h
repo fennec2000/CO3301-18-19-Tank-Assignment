@@ -15,8 +15,8 @@
 #ifndef GEN_C_VECTOR_4_H_INCLUDED
 #define GEN_C_VECTOR_4_H_INCLUDED
 
-#include "Defines.h"
-#include "Error.h"
+#include "../Common/Defines.h"
+#include "../Common/Error.h"
 #include "BaseMath.h"
 #include "CVector2.h"
 #include "CVector3.h"

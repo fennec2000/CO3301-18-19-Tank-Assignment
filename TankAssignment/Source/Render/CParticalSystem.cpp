@@ -1,5 +1,5 @@
 #include "CParticalSystem.h"
-#include "Camera.h"
+#include "../Scene/Camera.h"
 
 namespace gen
 {

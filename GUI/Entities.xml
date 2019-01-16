@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Level Setup -->
+<Level>
+
+  <!-- Entity Templates -->
+  <Templates>
+
+    <!-- Scenery Types -->
+    <EntityTemplate Type="Scenery" Name="Skybox" Mesh="Skybox.x"/>
+    <EntityTemplate Type="Scenery" Name="Floor" Mesh="Floor.x"/>
+    <EntityTemplate Type="Scenery" Name="Building" Mesh="Building.x"/>
+    <EntityTemplate Type="Scenery" Name="Tree" Mesh="Tree1.x"/>
+
+    <!-- Tank Types -->
+    <EntityTemplate Type="Tank" Name="Rouge Battle Tank" Mesh="HoverTank01.x" MaxSpeed="24.0" Acceleration="2.2" TurnSpeed="2.0" TurretTurnSpeed="1.0471975511965977461542144610932" MaxHP="100" ShellDamage="20" ShellAmmo="20"/>
+    <EntityTemplate Type="Tank" Name="Rogue Scout" Mesh="HoverTank02.x" MaxSpeed="30.0" Acceleration="2.8" TurnSpeed="2.6" TurretTurnSpeed="1.5707963267948966192313216916397" MaxHP="80" ShellDamage="15" ShellAmmo="30"/>
+    <EntityTemplate Type="Tank" Name="Rogue Heavy Tank" Mesh="HoverTank03.x" MaxSpeed="18.0" Acceleration="1.6" TurnSpeed="1.3" TurretTurnSpeed="0.78539816339744830961566084581988" MaxHP="120" ShellDamage="35" ShellAmmo="15"/>
+    <EntityTemplate Type="Tank" Name="Rogue Armed Tank" Mesh="HoverTank04.x" MaxSpeed="16.0" Acceleration="1.0" TurnSpeed="1.0" TurretTurnSpeed="0.62831853071795864769252867665590" MaxHP="150" ShellDamage="50" ShellAmmo="10"/>
+    <EntityTemplate Type="Tank" Name="Oberon Oppressor" Mesh="HoverTank05.x" MaxSpeed="30.0" Acceleration="2.8" TurnSpeed="2.6" TurretTurnSpeed="1.5707963267948966192313216916397" MaxHP="80" ShellDamage="15" ShellAmmo="30"/>
+    <EntityTemplate Type="Tank" Name="Oberon MkI" Mesh="HoverTank06.x" MaxSpeed="24.0" Acceleration="2.2" TurnSpeed="2.0" TurretTurnSpeed="1.0471975511965977461542144610932" MaxHP="100" ShellDamage="20" ShellAmmo="20"/>
+    <EntityTemplate Type="Tank" Name="Oberon MkII" Mesh="HoverTank07.x" MaxSpeed="18.0" Acceleration="1.6" TurnSpeed="1.3" TurretTurnSpeed="0.78539816339744830961566084581988" MaxHP="120" ShellDamage="35" ShellAmmo="15"/>
+    <EntityTemplate Type="Tank" Name="Oberon Black" Mesh="HoverTank08.x" MaxSpeed="16.0" Acceleration="1.0" TurnSpeed="1.0" TurretTurnSpeed="0.62831853071795864769252867665590" MaxHP="150" ShellDamage="50" ShellAmmo="10"/>
+    
+    <!-- Other Types -->
+    <EntityTemplate Type="Projectile" Name="Shell Type 1" Mesh="Bullet.x"/>
+    <EntityTemplate Type="Powerup" Name="Ammo Cube" Mesh="Cube.x"/>
+    
+  </Templates>
+  <!-- End of Entity Types -->
+
+
+  <!-- Scene Setup -->
+  <Entities>
+
+    <!-- Environment Positions -->
+    <Entity Type="Skybox" Name="Skybox">
+      <Position X="0.0" Y="-10000.0" Z="0.0"/>
+      <Scale X="10.0" Y="10.0" Z="10.0"/>
+    </Entity>
+    <Entity Type="Floor" Name="Floor">
+    </Entity>
+    <Entity Type="Building" Name="Building">
+      <Position X="0.0" Y="0.0" Z="0.0"/>
+    </Entity>
+    
+    <!-- Object Positions -->
+    <Entity Type="Rouge Battle Tank" Name="A-1"  Team="0">
+      <Position X="-15.0" Y="0.5" Z="-35.0"/>
+    </Entity>
+    <Entity Type="Rogue Scout" Name="A-2"  Team="0">
+      <Position X="-30.0" Y="0.5" Z="-35.0"/>
+    </Entity>
+    <Entity Type="Rogue Heavy Tank" Name="A-3"  Team="0">
+      <Position X="-30.0" Y="0.5" Z="-20.0"/>
+    </Entity>
+    <Entity Type="Rogue Armed Tank" Name="A-4"  Team="0">
+      <Position X="-30.0" Y="0.5" Z="-50.0"/>
+    </Entity>
+    <Entity Type="Oberon Oppressor" Name="B-1"  Team="1">
+      <Position X="15.0" Y="0.5" Z="20.0"/>
+      <Rotation X="0.0" Y="180.0" Z="0.0"/>
+    </Entity>
+    <Entity Type="Oberon MkI" Name="B-2"  Team="1">
+      <Position X="30.0" Y="0.5" Z="20.0"/>
+      <Rotation X="0.0" Y="180.0" Z="0.0"/>
+    </Entity>
+    <Entity Type="Oberon MkII" Name="B-3"  Team="1">
+      <Position X="30.0" Y="0.5" Z="5.0"/>
+      <Rotation X="0.0" Y="180.0" Z="0.0"/>
+    </Entity>
+    <Entity Type="Oberon Black" Name="B-4"  Team="1">
+      <Position X="30.0" Y="0.5" Z="45.0"/>
+      <Rotation X="0.0" Y="180.0" Z="0.0"/>
+    </Entity>
+    
+    <!-- Scenery Positions -->
+    <Entity Type="Tree" Name="Tree" Number="100">
+      <Position X="0.0" Y="0.0" Z="95.0">
+        <Randomise X="115.0" Y="0.0" Z="110.0"/>
+      </Position>
+      <Rotation X="0.0" Y="0.0" Z="0.0"/>
+      <RandomiseRot X="0.0" Y="360.0" Z="0.0"/>
+    </Entity>
+    
+    <!-- Powerups -->
+    <Entity Type="Ammo Cube" Name="Ammo Cube" Number="10">
+      <Position X="0.0" Y="0.5" Z="0.0">
+        <Randomise X="200.0" Y="0.0" Z="200.0"/>
+      </Position>
+      <Rotation X="0.0" Y="0.0" Z="0.0"/>
+      <RandomiseRot X="0.0" Y="360.0" Z="0.0"/>
+      <Scale X="0.1" Y="0.1" Z="0.1"/>
+    </Entity>
+
+  </Entities>
+  
+  <Waypoints>
+    <List>
+      <Waypoint X="-30.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="-30.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="-50.0" Y="0.5" Z="0.0"/>
+      <Waypoint X="-70.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="-70.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="-50.0" Y="0.5" Z="0.0"/>
+    </List>
+    <List>
+      <Waypoint X="30.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="30.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="50.0" Y="0.5" Z="0.0"/>
+      <Waypoint X="70.0" Y="0.5" Z="20.0"/>
+      <Waypoint X="70.0" Y="0.5" Z="-20.0"/>
+      <Waypoint X="50.0" Y="0.5" Z="0.0"/>
+    </List>
+  </Waypoints>
+  
+  <!-- End of Scene Setup -->
+</Level>

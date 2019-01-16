@@ -6,7 +6,7 @@
 ****************************************************************************************/
 
 #include "RenderMethod.h"
-#include "MathDX.h"
+#include "../Math/MathDX.h"
 
 namespace gen
 {

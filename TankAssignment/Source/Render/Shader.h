@@ -9,7 +9,7 @@
 #include <string>
 using namespace std;
 
-#include "Defines.h"
+#include "../Common/Defines.h"
 
 namespace gen
 {

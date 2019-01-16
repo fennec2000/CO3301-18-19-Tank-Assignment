@@ -12,7 +12,7 @@
 		V1.0    Created 12/06/06 - LN
 **************************************************************************************************/
 
-#include "Error.h"
+#include "../Common/Error.h"
 #include "BaseMath.h"
 
 namespace gen

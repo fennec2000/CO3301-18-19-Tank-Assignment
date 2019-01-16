@@ -30,8 +30,8 @@
 #include "TankEntity.h"
 #include "EntityManager.h"
 #include "Messenger.h"
-#include "CVector3.h"	// temp for waypoints
-#include "CRay.h"		// Ray
+#include "../Math/CVector3.h"	// temp for waypoints
+#include "../Math/CRay.h"		// Ray
 #include "TeamManager.h"// team manager
 
 #include <random>		// random for random pos
@@ -39,15 +39,16 @@
 namespace gen
 {
 
-// temp const
-	const TFloat32 Epsilon = 0.1f;
-	const TFloat32 waypointRadious = 2.5f;
-	const TFloat32 turretAngularVision = ToRadians(15);
-	const TFloat32 turretAimSpeedMultiplyer = 3.0f;
-	const TFloat32 minRotation = 0.001f;
-	const TFloat32 barrelLenght = 4.0f;
-	const TFloat32 tankGravity = 5.0f;
-	const TFloat32 deathForce = 10.0f;
+	// constants
+	const TFloat32 waypointRadious = 2.5f;				// leway on hitting waypoints
+	const TFloat32 turretAngularVision = ToRadians(15);	// half of the cone of vision
+	const TFloat32 turretAimSpeedMultiplyer = 3.0f;		// the multipler that increases speed using aim state
+	const TFloat32 minRotation = 0.001f;				// min rotation reqired before turning the turret
+	const TFloat32 barrelLenght = 4.0f;					// distance away a bullet spawns at
+	const TFloat32 tankGravity = 5.0f;					// rate which the turret falls at on death explosion
+	const TFloat32 deathForce = 10.0f;					// maximum power given to the turret on death explosion
+	const TInt32   defaultBulletDamage = 20;			// default damage a bullet does
+	const TFloat32 bulletDistance = 150.0f;				// the distance a bullet can travel
 
 	// random
 	std::default_random_engine generator;
@@ -161,6 +162,7 @@ pair<TFloat32, TFloat32> CTankEntity::AccAndTurn(CVector3 targetPos, TFloat32 up
 	return result;
 }
 
+// Gets finds and set the nearest ammo box as its target
 void CTankEntity::FindAmmo()
 {
 	vector<TEntityUID> list = EntityManager.GetListOfUID("Ammo Cube");
@@ -182,6 +184,23 @@ void CTankEntity::FindAmmo()
 	m_State = EState::GettingAmmo;
 }
 
+void CTankEntity::GetPatrolWaypoint()
+{
+	// always update team pos as it constantly changes
+	if (m_MemberState == ETankTeamMembership::teamMember)
+	{
+		m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
+	}
+	else if (Distance(m_TargetPosition, Position()) <= waypointRadious) // leader or solo
+	{
+		// next waypoint and face target
+		++m_Waypoint;
+		if (m_Waypoint >= GetMaxWaypoints(m_Team))
+			m_Waypoint = 0;
+		m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
+	}
+}
+
 // Update the tank - controls its behaviour. The shell code just performs some test behaviour, it
 // is to be rewritten as one of the assignment requirements
 // Return false if the entity is to be destroyed
@@ -189,6 +208,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 {
 	if (m_State == EState::Dying)
 	{
+		// blow off top and then disapear
 		Matrix(2).Move(m_DeathVec * updateTime);
 		Matrix(2).RotateLocalX(m_DeathVec.x * updateTime);
 		Matrix(2).RotateLocalY(m_DeathVec.y * updateTime);
@@ -225,32 +245,37 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			}
 			else if (msg.type == EMessageType::Msg_TankHit)
 			{
+				// from tank
 				auto entity = EntityManager.GetEntity(msg.from);
 				auto tank = dynamic_cast<CTankEntity*>(entity);
 				if (tank != nullptr)
 					m_HP -= tank->GetShellDamage();
 				else
-					m_HP -= 20;
+					m_HP -= defaultBulletDamage;
 
 				if (m_HP <= 0)
 				{
+					// dye
 					m_HP = 0;
 					TeamManager.UpdateMembership(m_Team);
 					m_State = EState::Dying;
 				}
-
-				// request help
-				SMessage msg;
-				msg.type = EMessageType::Msg_TankHelp;
-				msg.from = m_UID;
-				const int teamSize = TeamManager.GetTeamSize(m_Team);
-				for (int j = 0; j < teamSize; ++j)
+				else
 				{
-					const auto tankUID = TeamManager.GetTankUID(m_Team, j);
-					if (tankUID == m_UID)
-						continue;
-					Messenger.SendMessage(tankUID, msg);
+					// request help
+					SMessage msg;
+					msg.type = EMessageType::Msg_TankHelp;
+					msg.from = m_UID;
+					const int teamSize = TeamManager.GetTeamSize(m_Team);
+					for (int j = 0; j < teamSize; ++j)
+					{
+						const auto tankUID = TeamManager.GetTankUID(m_Team, j);
+						if (tankUID == m_UID)
+							continue;
+						Messenger.SendMessage(tankUID, msg);
+					}
 				}
+				
 			}
 			else if (msg.type == EMessageType::Msg_TankEvade)
 			{
@@ -276,9 +301,9 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 			else if (msg.type == EMessageType::Msg_TankHelp)
 			{
+				m_State = EState::Evade;
 				auto hurtTank = EntityManager.GetEntity(msg.from);
 				auto normalVectorToTarget = Normalise(hurtTank->Position() - Position());
-				m_State = EState::Evade;
 				m_TargetPosition = hurtTank->Position() - normalVectorToTarget * teamMemberSpace;
 			}
 
@@ -294,21 +319,9 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 
 		// Tank behaviour
-		// Only move if in Go state
 		if (m_State == EState::Patrol)
 		{
-			if (m_MemberState == ETankTeamMembership::teamMember)
-				m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
-
-			// check if at waypoint
-			if (Distance(m_TargetPosition, Position()) <= waypointRadious)
-			{
-				// next waypoint and face target
-				++m_Waypoint;
-				if (m_Waypoint >= GetMaxWaypoints(m_Team))
-					m_Waypoint = 0;
-				m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
-			}
+			GetPatrolWaypoint();
 
 			// target in range
 			const int NumOfTeams = TeamManager.GetNumberOfTeams();
@@ -324,23 +337,31 @@ bool CTankEntity::Update( TFloat32 updateTime )
 					auto enemy = EntityManager.GetEntity(enemyUID);
 					if (enemy != nullptr)
 					{
-						const auto targetVector = enemy->Position() - Position();
-						auto turret = Matrix(2) * Matrix();
-						const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
-
-						if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+						// within bullet distance
+						// no need to aim at something out of distance
+						auto distance = Distance(enemy->Position(), Position());
+						if (distance <= bulletDistance)
 						{
-							m_State = EState::Aim;
-							m_TurretSpeed = 0;
-							m_Speed = 0;
-							m_TurnSpeed = 0;
-							m_Countdown = 1.0f;
-							m_Target = enemyUID;
+							const auto targetVector = enemy->Position() - Position();
+							auto turret = Matrix(2) * Matrix();
+							const auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
+
+							// within cone of vision & no building in the way
+							if (abs(rotationToTarget) < turretAngularVision && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+							{
+								m_State = EState::Aim;
+								m_TurretSpeed = 0;
+								m_Speed = 0;
+								m_TurnSpeed = 0;
+								m_Countdown = 1.0f;
+								m_Target = enemyUID;
+							}
 						}
 					}
 				}
 			}
 
+			// get move
 			const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
 			m_Speed = speedAndTurn.first;
 			m_TurnSpeed = speedAndTurn.second;
@@ -351,16 +372,16 @@ bool CTankEntity::Update( TFloat32 updateTime )
 			auto enemy = EntityManager.GetEntity(m_Target);
 			if (enemy == nullptr) // enemy dies
 			{
-				if (m_Ammo <= 0)
-					FindAmmo();
-				else
-					m_State = EState::Patrol;
+				m_State = EState::Patrol;
 			}
+
 			auto targetVector = enemy->Position() - Position();
 			auto turret = Matrix(2) * Matrix();
 			auto rotationToTarget = Dot(Normalise(targetVector), Normalise(turret.ZAxis()));
 			bool toRight = (Dot(targetVector, turret.XAxis()) > 0) ? true : false;
 			TFloat32 acosRot = acos(rotationToTarget);
+
+			// turn if not looking at target
 			if (acosRot > minRotation)
 			{
 				if (toRight)
@@ -369,9 +390,11 @@ bool CTankEntity::Update( TFloat32 updateTime )
 					m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
 			}
 
+			// finished aiming
 			if (m_Countdown <= 0)
 			{
-				if (!Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
+				auto distance = Distance(enemy->Position(), Position());
+				if (distance <= bulletDistance && !Ray.HitBuilding(Position(), turret.ZAxis(), enemy->Position()))
 				{
 					// fire
 					auto bulletUID = EntityManager.CreateShell("Shell Type 1", "Bullet", turret.Position() + turret.ZAxis() * barrelLenght, CVector3(0, 0, 0));
@@ -387,10 +410,7 @@ bool CTankEntity::Update( TFloat32 updateTime )
 				}
 				else
 				{
-					if (m_Ammo <= 0)
-						FindAmmo();
-					else
-						m_State = EState::Patrol;
+					m_State = EState::Patrol;
 				}
 			}
 
@@ -417,19 +437,27 @@ bool CTankEntity::Update( TFloat32 updateTime )
 					m_TurretSpeed = Min(acosRot, -(m_TankTemplate->GetTurretTurnSpeed())) * turretAimSpeedMultiplyer;
 			}
 
+			// evade waypoint detection
 			if (Distance(m_TargetPosition, Position()) <= waypointRadious)
 			{
-				m_State = EState::Patrol;
-				m_TargetPosition = GetWaypoint(m_Team, m_Waypoint);
-				m_TurretSpeed = m_TankTemplate->GetTurretTurnSpeed();
+				// refill
+				if (m_Ammo <= 0)
+					FindAmmo();
+				else
+					GetPatrolWaypoint();
 			}
 
+			// calc movement
 			const auto speedAndTurn = AccAndTurn(m_TargetPosition, updateTime);
 			m_Speed = speedAndTurn.first;
 			m_TurnSpeed = speedAndTurn.second;
 		}
 		else if (m_State == EState::GettingAmmo)
 		{
+			// Got ammo
+			if (m_Ammo > 0)
+				m_State = EState::Patrol;
+
 			//if target is null get another
 			if (EntityManager.GetEntity(m_Target) == nullptr)
 				FindAmmo();
@@ -441,6 +469,9 @@ bool CTankEntity::Update( TFloat32 updateTime )
 		}
 		else	// EState::Inactive and catches unknown states
 		{
+			m_Speed = 0;
+			m_TurnSpeed = 0;
+			m_TurretSpeed = 0;
 		}
 
 		// Perform movement...
@@ -450,11 +481,6 @@ bool CTankEntity::Update( TFloat32 updateTime )
 
 		// turret
 		Matrix(2).RotateLocalY(m_TurretSpeed * updateTime);
-
-		// mgs to display text on screen
-		msg.type = EMessageType::Msg_DisplayEntityInfo;
-		msg.from = GetUID();
-		Messenger.SendMessage(TextSystemUID, msg);
 	}
 	
 

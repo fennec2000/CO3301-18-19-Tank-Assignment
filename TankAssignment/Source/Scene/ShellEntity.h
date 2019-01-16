@@ -9,8 +9,8 @@
 #include <string>
 using namespace std;
 
-#include "Defines.h"
-#include "CVector3.h"
+#include "../Common/Defines.h"
+#include "../Math/CVector3.h"
 #include "Entity.h"
 
 namespace gen
@@ -63,7 +63,8 @@ public:
 	// Keep as a virtual function in case of further derivation
 	virtual bool Update( TFloat32 updateTime );
 
-	void BulletOwner(TEntityUID tank);
+	// store to which tank shot it, a kind of sudo ownership
+	void BulletOwner(TEntityUID tank); 
 	
 
 /////////////////////////////////////
@@ -74,7 +75,7 @@ private:
 	// Data
 
 	// Add your shell data here
-	TEntityUID m_UID;	// bullet UID
+	TEntityUID m_OwnerUID;	// bullet UID
 	TFloat32 m_Speed;	// speed of the bullet
 	TFloat32 m_Life;	// the time the bullet is alive for
 };

@@ -18,7 +18,7 @@
 
 #include "CMatrix3x3.h"
 
-#include "Error.h"
+#include "../Common/Error.h"
 #include "CMatrix2x2.h"
 #include "CQuaternion.h"
 

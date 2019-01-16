@@ -21,7 +21,7 @@ using namespace std;
 #include <rmxfguid.h>
 #include <rmxftmpl.h>
 
-#include "Error.h"
+#include "../Common/Error.h"
 #include "CImportXFile.h"
 
 namespace gen

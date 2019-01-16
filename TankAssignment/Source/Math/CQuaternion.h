@@ -14,7 +14,7 @@
 #ifndef GEN_C_QUATERNION_H_INCLUDED
 #define GEN_C_QUATERNION_H_INCLUDED
 
-#include "Defines.h"
+#include "../Common/Defines.h"
 #include "BaseMath.h"
 #include "CVector3.h"
 #include "CMatrix4x4.h"

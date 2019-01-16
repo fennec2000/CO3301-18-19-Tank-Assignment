@@ -4,8 +4,8 @@
 	Shader Support Implementation
 ********************************************/
 
-#include "Defines.h"
-#include "BaseMath.h"
+#include "../Common/Defines.h"
+#include "../Math/BaseMath.h"
 #include "Shader.h"
 
 namespace gen

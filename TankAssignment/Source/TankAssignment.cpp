@@ -364,7 +364,6 @@ void UpdateScene( float updateTime )
 
 	// System messages
 	// Go
-
 	if (KeyHit(Key_1))
 	{
 		const int NumOfTeams = TeamManager.GetNumberOfTeams();

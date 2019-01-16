@@ -15,9 +15,9 @@
 #ifndef GEN_C_VECTOR_2_H_INCLUDED
 #define GEN_C_VECTOR_2_H_INCLUDED
 
-#include "Defines.h"
-#include "Error.h"
-#include "BaseMath.h"
+#include "../Common/Defines.h"
+#include "../Common/Error.h"
+#include "../Math/BaseMath.h"
 
 namespace gen
 {

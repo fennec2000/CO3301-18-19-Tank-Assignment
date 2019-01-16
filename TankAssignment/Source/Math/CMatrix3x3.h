@@ -56,7 +56,7 @@
 #ifndef GEN_C_MATRIX_3X3_H_INCLUDED
 #define GEN_C_MATRIX_3X3_H_INCLUDED
 
-#include "Defines.h"
+#include "../Common/Defines.h"
 #include "BaseMath.h"
 #include "CVector2.h"
 #include "CVector3.h"

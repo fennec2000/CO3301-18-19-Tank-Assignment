@@ -16,7 +16,7 @@
 
 #include "CMatrix2x2.h"
 
-#include "Error.h"
+#include "../Common/Error.h"
 
 namespace gen
 {
