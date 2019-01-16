@@ -22,7 +22,7 @@
     <EntityTemplate Type="Tank" Name="Oberon Black" Mesh="HoverTank08.x" MaxSpeed="16.0" Acceleration="1.0" TurnSpeed="1.0" TurretTurnSpeed="0.62831853071795864769252867665590" MaxHP="150" ShellDamage="50" ShellAmmo="10"/>
     
     <!-- Other Types -->
-    <EntityTemplate Type="Projectile" Name="Shell Type 1" Mesh="Bullet.x"/>
+    <EntityTemplate Type="Projectile" Name="Shell Type 1" Mesh="Bullet.x"/>z
     <EntityTemplate Type="Powerup" Name="Ammo Cube" Mesh="Cube.x"/>
     
   </Templates>

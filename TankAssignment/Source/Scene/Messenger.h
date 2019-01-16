@@ -31,6 +31,7 @@ enum class EMessageType
 	Msg_TankBecomeTeamMember,	// Make the tank a team member
 	Msg_TankHelp,				// reqest help
 	Msg_GiveAmmo,				// give a tank ammo
+	Msg_EvadeToFormation,		// forces tanks to formation waypoints
 
 	Msg_DisplayEntityInfo		// display message to screen
 };

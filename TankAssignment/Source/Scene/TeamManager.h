@@ -13,7 +13,19 @@ extern CMessenger Messenger;
 
 // global
 const float teamMemberSpace = 15.0f;
-enum class EFormation { line, square, surround };
+
+enum class EFormation { line, square };
+EFormation& operator++(EFormation& value)
+{
+	switch (value)
+	{
+	case EFormation::line:
+		return value = EFormation::square;
+	case EFormation::square:
+		return value = EFormation::line;
+	}
+	return value; // some compilers might warn otherwise
+}
 
 class CTeamManager
 {
@@ -39,6 +51,7 @@ public:
 
 	int AddTank(TEntityUID tankUID, int team);	// adds a tank to a team
 	bool UpdateMembership(int team);			// checks team leader, re-asign team leader if ther is none and updates position in team
+	void ChangeFormation(int team);						// rotate between team formations
 };
 }
 

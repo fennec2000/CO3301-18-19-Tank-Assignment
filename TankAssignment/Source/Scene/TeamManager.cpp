@@ -109,3 +109,11 @@ bool gen::CTeamManager::UpdateMembership(int team)
 	}
 	return true;
 }
+
+void gen::CTeamManager::ChangeFormation(int team)
+{
+	// increment enum
+	// enum contains a ++ overload
+	// update overload if extra states added
+	m_TeamFormation.at(team) = ++m_TeamFormation.at(team);
+}

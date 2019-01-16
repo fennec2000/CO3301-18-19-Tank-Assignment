@@ -37,7 +37,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CLRSupport>true</CLRSupport>
+    <CLRSupport>false</CLRSupport>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -164,86 +164,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseLevel.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseXML.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\BaseMath.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix2x2.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix3x3.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix4x4.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuaternion.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuatTransform.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CRay.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector2.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector3.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector4.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathIO.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CImportXFile.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CParticalSystem.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Mesh.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\RenderMethod.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Shader.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Camera.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Entity.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\EntityManager.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Light.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Messenger.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Powerup.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\ShellEntity.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TankEntity.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TeamManager.cpp" />
-    <ClCompile Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\UI\Input.cpp" />
     <ClCompile Include="ParticleForm.cpp" />
-    <ClCompile Include="Source\Common\CFatalException.cpp" />
-    <ClCompile Include="Source\Common\CHashTable.cpp" />
-    <ClCompile Include="Source\Common\CTimer.cpp" />
-    <ClCompile Include="Source\Common\MSDefines.cpp" />
-    <ClCompile Include="Source\Common\Utility.cpp" />
     <ClCompile Include="Source\MainApp.cpp" />
-    <ClCompile Include="Source\TankAssignment.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseLevel.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Data\CParseXML.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\BaseMath.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix2x2.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix3x3.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CMatrix4x4.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuaternion.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CQuatTransform.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CRay.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector2.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector3.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\CVector4.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathDX.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Math\MathIO.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CImportXFile.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Colour.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\CParticalSystem.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Mesh.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\MeshData.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\RenderMethod.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\Shader.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Camera.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Entity.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\EntityManager.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Light.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Messenger.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\Powerup.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\ShellEntity.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TankEntity.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Scene\TeamManager.h" />
-    <ClInclude Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\UI\Input.h" />
     <ClInclude Include="ParticleForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Source\Common\CFatalException.h" />
-    <ClInclude Include="Source\Common\CHashTable.h" />
-    <ClInclude Include="Source\Common\CTimer.h" />
-    <ClInclude Include="Source\Common\Defines.h" />
-    <ClInclude Include="Source\Common\Error.h" />
-    <ClInclude Include="Source\Common\MSDefines.h" />
-    <ClInclude Include="Source\Common\Utility.h" />
-    <ClInclude Include="Source\TankAssignment.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ParticleForm.resx">
@@ -254,9 +181,9 @@
     <Xml Include="Entities.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="H:\Git\CO3301-18-19-Tank-Assignment\TankAssignment\Source\Render\TankAssignment.fx">
-      <FileType>Document</FileType>
-    </None>
+    <ProjectReference Include="..\TankAssignment\TankAssignment.vcxproj">
+      <Project>{3a68081d-e8f9-4523-9436-530de9e5530c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

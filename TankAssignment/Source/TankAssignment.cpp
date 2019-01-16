@@ -435,6 +435,32 @@ void UpdateScene( float updateTime )
 		}
 	}
 
+	// formation
+	if (KeyHit(Key_5))
+	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
+		SMessage msg;
+		msg.type = EMessageType::Msg_EvadeToFormation;
+		msg.from = SystemUID;
+		for (int i = 0; i < NumOfTeams; ++i)
+		{
+			const int teamSize = TeamManager.GetTeamSize(i);
+			for (int j = 0; j < teamSize; ++j)
+			{
+				const auto tankUID = TeamManager.GetTankUID(i, j);
+				Messenger.SendMessage(tankUID, msg);
+			}
+		}
+	}
+
+	// swap formation
+	if (KeyHit(Key_6))
+	{
+		const int NumOfTeams = TeamManager.GetNumberOfTeams();
+		for (int i = 0; i < NumOfTeams; ++i)
+			TeamManager.ChangeFormation(i);
+	}
+
 	// last tank on camera
 	if (KeyHit(Key_7))
 	{

@@ -315,6 +315,12 @@ bool CTankEntity::Update( TFloat32 updateTime )
 				if (m_Ammo > maxAmmo) // cap at max
 					m_Ammo = maxAmmo;
 			}
+
+			else if (msg.type == EMessageType::Msg_EvadeToFormation)
+			{
+				m_State = EState::Evade;
+				m_TargetPosition = TeamManager.GetTankPos(m_Team, m_TeamMemberNumber);
+			}
 		}
 
 
